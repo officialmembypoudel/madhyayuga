@@ -1,0 +1,13 @@
+{
+  "name": "madhyayuga",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "server": "cd server && brew services start mongodb/brew/mongodb-community && npm start",
+    "client": "cd app && npx expo start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
