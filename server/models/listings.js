@@ -6,7 +6,8 @@ const listingsSchema = new mongoose.Schema({
     required: true,
   },
   userId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "user",
     required: true,
   },
   description: {
@@ -47,7 +48,8 @@ const listingsSchema = new mongoose.Schema({
     required: true,
   },
   categoryId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "category",
     required: true,
   },
 });

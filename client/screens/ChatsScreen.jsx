@@ -1,5 +1,5 @@
-import { StyleSheet, TouchableOpacity, View } from "react-native";
-import React, { useState } from "react";
+import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
+import React, { useContext, useEffect, useState } from "react";
 import { containerStyles } from "../helpers/objects";
 import {
   makeStyles,
@@ -14,34 +14,19 @@ import { useNavigation } from "@react-navigation/native";
 import ModeToogleComponent from "../components/ModeToogleComponent";
 import ChatCard from "../components/ChatCard";
 import ScreenHeaderComponent from "../components/ScreenHeaderComponent";
-const chats = [
-  {
-    id: 1,
-    sender: "Memby Poudel",
-    message: "Hi I was interested in your product!",
-  },
-  {
-    id: 2,
-    sender: "Saral Dahal",
-    message: "I have a great mattress to exchange with your sari",
-  },
-  {
-    id: 3,
-    sender: "Saroj Raut",
-    message: "मलाई सार्है मन् पर्यो लयाप्टप। साटाै!",
-  },
-];
+import { ChatContext } from "../context/chatContext";
+
 const ChatsScreen = () => {
   const style = useTheme();
+  const { chatRooms, getChatRooms, onlineUsers } = useContext(ChatContext);
   const navigation = useNavigation();
   const [isDark, setIsDark] = useState(false);
   const { mode, setMode } = useThemeMode();
 
-  const handleOnPress = (state) => {
-    setIsDark(state);
-    // console.log(state);
-    setMode(state ? "dark" : "light");
-  };
+  useEffect(() => {
+    getChatRooms();
+  }, [onlineUsers]);
+
   return (
     <View
       style={{
@@ -50,11 +35,19 @@ const ChatsScreen = () => {
       }}
     >
       <ScreenHeaderComponent title="Chats" />
-      {chats.map((chat) => (
-        <View key={chat.id} style={{ width: "100%", marginBottom: 15 }}>
-          <ChatCard chats={chat} />
-        </View>
-      ))}
+      {chatRooms?.length > 0 ? (
+        <FlatList
+          style={{ width: "100%" }}
+          contentContainerStyle={{ padding: 2 }}
+          data={chatRooms}
+          keyExtractor={(item) => Date.now()}
+          renderItem={({ item }) => (
+            <View key={item?._id} style={{ width: "100%", marginBottom: 15 }}>
+              <ChatCard chats={item} />
+            </View>
+          )}
+        />
+      ) : null}
     </View>
   );
 };

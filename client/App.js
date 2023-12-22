@@ -72,6 +72,7 @@ import AuthProvider from "./context/authContext";
 import { Router } from "./navigator/StackNavigator";
 import { Provider } from "react-redux";
 import { store } from "./store";
+import ChatProvider from "./context/chatContext";
 
 const theme = createTheme({
   lightColors: {
@@ -155,11 +156,13 @@ export default function App() {
       <ThemeProvider theme={theme}>
         <Provider store={store}>
           <StatusBar style="auto" />
-          <AuthProvider>
-            <NavigationContainer>
-              <Router />
-            </NavigationContainer>
-          </AuthProvider>
+          <NavigationContainer>
+            <AuthProvider>
+              <ChatProvider>
+                <Router />
+              </ChatProvider>
+            </AuthProvider>
+          </NavigationContainer>
         </Provider>
       </ThemeProvider>
     );

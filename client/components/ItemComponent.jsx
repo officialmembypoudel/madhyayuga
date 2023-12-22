@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   makeStyles,
   Text,
@@ -58,7 +58,6 @@ export default function ItemComponent({ type, item, zindex }) {
           borderRadius: 10,
           width: type === "row" ? 190 : "100%",
           elevation: 0,
-          // height: 200,
         }}
         wrapperStyle={{
           display: "flex",
@@ -68,28 +67,30 @@ export default function ItemComponent({ type, item, zindex }) {
           alignItems: type === "column" ? "center" : "flex-start",
         }}
       >
-        {/* <Card.Image
-          style={{
-            resizeMode: "cover",
-            width: 172,
-            height: 138,
-            padding: 0,
-          }}
-          source={{
-            uri: item.imageSrc,
-          }}
-        /> */}
-        <Avatar
-          // title={item?.name}
-          source={{ uri: setImageQuality(item?.images[0]?.url, 35) }}
-          containerStyle={{
-            width: 172,
-            height: 138,
-            borderRadius: 5,
-            backgroundColor: theme.colors.grey3,
-          }}
-          imageProps={{ borderRadius: 5 }}
-        />
+        {item?.images ? (
+          <Avatar
+            title={item?.name}
+            source={{ uri: setImageQuality(item?.images[0]?.url, 35) }}
+            imageProps={{ borderRadius: 5 }}
+            containerStyle={{
+              width: 172,
+              height: 138,
+              borderRadius: 5,
+              backgroundColor: theme.colors.grey3,
+            }}
+          />
+        ) : (
+          <Avatar
+            title={item?.name}
+            imageProps={{ borderRadius: 5 }}
+            containerStyle={{
+              width: 172,
+              height: 138,
+              borderRadius: 5,
+              backgroundColor: theme.colors.grey3,
+            }}
+          />
+        )}
         <View
           style={{
             marginLeft: type === "column" ? "auto" : 0,

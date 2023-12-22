@@ -140,7 +140,6 @@ export const getUserByID = async (req, res) => {
 
     let user = await userModel.findById(userId);
 
-    console.log(userId);
     if (!user) {
       return res
         .status(400)

@@ -45,7 +45,10 @@ export const addListing = async (req, res) => {
 
 export const getListings = async (req, res) => {
   try {
-    const listings = await listingsModel.find({}).sort({ createdAt: -1 });
+    const listings = await listingsModel
+      .find({})
+      .sort({ createdAt: -1 })
+      .populate("userId", "name email avatar phone");
     const total = await listingsModel.countDocuments({});
 
     res.status(200).json({

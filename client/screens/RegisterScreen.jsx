@@ -37,7 +37,7 @@ const RegisterScreen = () => {
   const [newUser, SetNewUser] = useState(defaultUserValue);
 
   const handleRegister = async () => {
-    // TODO add register
+    // TODO add register logic
     try {
       const response = await client.post(
         "/register",
@@ -59,7 +59,8 @@ const RegisterScreen = () => {
         navigation.navigate("VerifyOTP");
       }
     } catch (error) {
-      console.log(error.response.data);
+      console.log("Failed to register");
+      console.log(error);
     }
   };
 

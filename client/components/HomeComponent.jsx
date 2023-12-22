@@ -1,12 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import {
-  FlatList,
-  ScrollView,
-  SectionList,
-  TouchableOpacity,
-  View,
-  VirtualizedList,
-} from "react-native";
+import { FlatList, TouchableOpacity, View } from "react-native";
 import {
   makeStyles,
   Text,
@@ -33,6 +26,7 @@ import {
 } from "../store/listings";
 import { useNavigation } from "@react-navigation/native";
 import { getFirstName } from "../helpers/functions";
+import { ScrollView } from "react-native-virtualized-view";
 
 const SectionTitle = ({ title, onPress }) => {
   const style = useTheme();
@@ -76,7 +70,7 @@ const HomeComponent = () => {
   const sections = [
     {
       title: "hot",
-      data: [],
+      data: allListings,
       horizontal: true,
     },
     {
@@ -157,67 +151,59 @@ const HomeComponent = () => {
       {allListings && (
         <>
           <CategoryComponent />
-          <SectionTitle
-            title={"New In the Town"}
-            onPress={() => navigate("NewListing")}
-          />
+          <ScrollView></ScrollView>
           <FlatList
-            style={{ width: "100%" }}
+            style={{
+              width: "100%",
+            }}
             contentContainerStyle={{ paddingBottom: 70 }}
             showsHorizontalScrollIndicator={false}
             overScrollMode="never"
-            // horizontal={true}
+            horizontal={false}
             data={allListings}
-            // keyExtractor={(item) => item.$id}
+            keyExtractor={(item) => item._id}
             renderItem={({ item }) => (
               <ItemComponent type="column" item={{ ...item, from: "home" }} />
             )}
+            StickyHeaderComponent={() => (
+              <SectionTitle
+                title={"Hot In the Town"}
+                onPress={() => navigate("NewListing")}
+              />
+            )}
+            ListHeaderComponent={() => (
+              <View>
+                <SectionTitle
+                  title={"New In the Town"}
+                  onPress={() => navigate("NewListing")}
+                />
+                <FlatList
+                  style={{
+                    width: "100%",
+                  }}
+                  contentContainerStyle={{ paddingBottom: 5 }}
+                  showsHorizontalScrollIndicator={false}
+                  overScrollMode="never"
+                  horizontal={true}
+                  data={allListings}
+                  keyExtractor={(item) => item._id}
+                  renderItem={({ item }) => (
+                    <ItemComponent
+                      type="row"
+                      item={{ ...item, from: "home" }}
+                    />
+                  )}
+                />
+                {/* from here */}
+                <SectionTitle
+                  title={"Hot In the Town"}
+                  onPress={() => navigate("NewListing")}
+                />
+                {/* chat gpt make this block of code skicky when scrolling */}
+              </View>
+            )}
           />
         </>
-        // <SectionList
-        //   showsVerticalScrollIndicator={false}
-        //   // overScrollMode="never"
-        //   sections={sections}
-        //   keyExtractor={(item, index) => item.$id + index}
-        //   renderItem={({ item, section }) => {
-        //     return (
-        //       <ItemComponent
-        //         type="column"
-        //         item={{ ...item, from: "home" }}
-        //         zindex={99}
-        //       />
-        //     );
-        //   }}
-        //   renderSectionHeader={({ section: { title, horizontal } }) => {
-        //     if (horizontal) {
-        //       return (
-        //         <>
-        //           {/* <CategoryComponent /> */}
-        //           <SectionTitle title={"Hot In The Area"} />
-        //           <FlatList
-        //             showsHorizontalScrollIndicator={false}
-        //             overScrollMode="never"
-        //             horizontal={true}
-        //             data={exchangeItems}
-        //             keyExtractor={(item) => item.id + 1}
-        //             renderItem={({ item }) => (
-        //               <ItemComponent type="row" item={item} zindex={0} />
-        //             )}
-        //           />
-        //         </>
-        //       );
-        //     } else {
-        //       return (
-        //         <SectionTitle
-        //           title="New From The Town"
-        //           onPress={navigateToNewListings}
-        //         />
-        //       );
-        //     }
-        //   }}
-        //   contentContainerStyle={{ paddingBottom: 65 }}
-        //   stickySectionHeadersEnabled={true}
-        // />
       )}
     </View>
   );

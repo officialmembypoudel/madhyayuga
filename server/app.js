@@ -5,6 +5,8 @@ import bodyParser from "body-parser";
 import user from "./routers/user.js";
 import listings from "./routers/listings.js";
 import category from "./routers/category.js";
+import comments from "./routers/comments.js";
+import chatModule from "./routers/chatModule.js";
 
 export const app = express();
 
@@ -15,3 +17,5 @@ app.use(cors());
 app.use("/api/v1", user);
 app.use("/api/v1", listings);
 app.use("/api/v1", category);
+app.use("/api/v1", comments);
+app.use("/api/v1", chatModule);

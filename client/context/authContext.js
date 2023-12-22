@@ -1,10 +1,7 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
-import { useThemeMode } from "@rneui/themed";
 import React, { createContext, useEffect, useState } from "react";
-import { account } from "../configs/appwrite";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useThemeMode } from "@rneui/themed";
 import { client } from "../configs/axios";
-import axios from "axios";
 
 export const AuthContext = createContext();
 const AuthProvider = ({ children }) => {

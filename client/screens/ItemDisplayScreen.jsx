@@ -3,9 +3,16 @@ import {
   TouchableOpacity,
   View,
   Image,
-  ScrollView,
+  // ScrollView,
+  FlatList,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+
+import {
+  GestureHandlerRootView,
+  ScrollView,
+} from "react-native-gesture-handler";
+
+import React, { useContext, useEffect, useState } from "react";
 import { containerStyles } from "../helpers/objects";
 import {
   makeStyles,
@@ -30,12 +37,14 @@ import { dummyText } from "../dummyData/exchangeItems";
 import { setImageQuality, textTrimmer } from "../helpers/functions";
 import { SearchBarAndroid } from "@rneui/base/dist/SearchBar/SearchBar-android";
 import { databases } from "../configs/appwrite";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { updateViews } from "../store/listings";
 import NewListings from "./NewListings";
 import { client } from "../configs/axios";
+import { fetchAllComments, getAllComments } from "../store/comments";
+import { ChatContext } from "../context/chatContext";
 
-const CommentComponent = () => {
+const CommentComponent = ({ comment }) => {
   const { mode } = useThemeMode();
   const { theme } = useTheme();
   return (
@@ -52,7 +61,8 @@ const CommentComponent = () => {
           size="medium"
           rounded
           title="PIC"
-          containerStyle={{ backgroundColor: "red" }}
+          source={{ uri: setImageQuality(comment?.user?.avatar?.url, 35) }}
+          containerStyle={{ backgroundColor: "rgb(0,0,0,0)" }}
         />
         <Card
           containerStyle={{
@@ -67,10 +77,10 @@ const CommentComponent = () => {
           // wrapperStyle={{ backgroundColor: "red" }}
         >
           <Text style={{ fontFamily: `${defaultFont}_600SemiBold` }}>
-            Nikesh Khadka
+            {comment?.user?.name}
           </Text>
           <Text style={{ fontFamily: `${defaultFont}_400Regular` }}>
-            I would like to exchange it with my earbuds.
+            {comment.text}
           </Text>
         </Card>
       </View>
@@ -89,10 +99,18 @@ const CommentComponent = () => {
 
 const ItemDetailsTab = ({ setScrollEnabled, item }) => {
   const style = useTheme();
-  const [index, setIndex] = useState(0);
+  const dispatch = useDispatch();
   const theme = useTheme();
+  const [index, setIndex] = useState(0);
   const { mode } = useThemeMode();
   const [query, setQuery] = useState("");
+  const comments = useSelector(getAllComments);
+
+  useEffect(() => {
+    dispatch(fetchAllComments({ listingId: item?._id }));
+  }, []);
+
+  console.log(comments);
 
   return (
     <>
@@ -221,14 +239,16 @@ const ItemDetailsTab = ({ setScrollEnabled, item }) => {
             collapsable
           >
             <View style={{ width: "100%" }}>
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                style={{ height: 340, width: "100%" }}
-                nestedScrollEnabled={true}
-                contentContainerStyle={{ paddingTop: 20 }}
-              >
-                <CommentComponent />
-                <Text>{dummyText}</Text>
+              <ScrollView horizontal>
+                <FlatList
+                  showsVerticalScrollIndicator={false}
+                  style={{ height: 340, width: "100%" }}
+                  nestedScrollEnabled={true}
+                  contentContainerStyle={{ paddingTop: 20 }}
+                  data={comments}
+                  renderItem={({ item }) => <CommentComponent comment={item} />}
+                  // horizontal={false}
+                />
               </ScrollView>
               <View style={{ width: "100%" }}>
                 <SearchBarAndroid
@@ -281,7 +301,7 @@ const ItemDetailsTab = ({ setScrollEnabled, item }) => {
                   }}
                   onChangeText={(input) => setQuery(input)}
                   onClear={() => setQuery("")}
-                  placeholder="add a question"
+                  placeholder="add a comment"
                   selectionColor={theme.theme.colors.primary}
                 />
               </View>
@@ -365,6 +385,7 @@ const ItemDisplayScreen = ({ route }) => {
   const dispatch = useDispatch();
   const style = useTheme();
   const navigation = useNavigation();
+  const { createChatRoom } = useContext(ChatContext);
   const [isDark, setIsDark] = useState(false);
   const { mode, setMode } = useThemeMode();
   const { item } = route.params;
@@ -373,38 +394,10 @@ const ItemDisplayScreen = ({ route }) => {
   const [user, setUser] = useState({});
 
   useEffect(() => {
-    if (item.from === "home") {
-      dispatch(updateViews({ ...item, limit: 5 }));
-    } else if (item.from === "newListing") {
-      dispatch(updateViews({ ...item, limit: 100 }));
-    }
-  }, [item.$updatedAt, dispatch]);
-
-  useEffect(() => {
-    setUser({});
-    const getUser = async () => {
-      try {
-        const response = await client.post(
-          "/profile",
-          { userId: item?.userId },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        if (response.data.user) {
-          setUser(response.data.user);
-          console.log(response.data.user);
-        }
-      } catch (error) {
-        console.log(error.response.data);
-      }
-    };
-    getUser();
+    setUser(item?.userId);
   }, [item]);
   return (
-    <View
+    <GestureHandlerRootView
       style={{
         ...containerStyles,
         backgroundColor: style.theme.colors.background,
@@ -417,6 +410,7 @@ const ItemDisplayScreen = ({ route }) => {
         // nestedScrollEnabled={true}
         scrollEnabled={true}
         showsVerticalScrollIndicator={false}
+        // horizontal
       >
         <ScreenHeaderComponent title={item.name} hideModeToggle={false} />
         <Card
@@ -576,12 +570,15 @@ const ItemDisplayScreen = ({ route }) => {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.buttons, { backgroundColor: "rgba(7, 94, 84,0.6)" }]}
+          onPress={() => {
+            createChatRoom(item?._id, item?.userId?._id);
+          }}
         >
-          <Icon name="logo-whatsapp" type="ionicon" />
-          <NormalDataTextComponent text="WhatsApp" />
+          <Icon name="chatbox-outline" type="ionicon" />
+          <NormalDataTextComponent text="Chat" />
         </TouchableOpacity>
       </View>
-    </View>
+    </GestureHandlerRootView>
   );
 };
 

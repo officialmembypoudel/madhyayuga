@@ -35,6 +35,7 @@ const AddProfilePhoto = () => {
 
     if (!result.canceled) {
       setSelectedImg(result.assets[0]);
+      console.log(result.assets[0]);
     }
   };
 
@@ -42,9 +43,11 @@ const AddProfilePhoto = () => {
     const formData = new FormData();
     formData.append("avatar", {
       uri: selectedImg.uri,
+      // uri: selectedImg.replace("file://", ""),
       type: mime.getType(selectedImg.uri),
       name: selectedImg.uri.split("/").pop(),
     });
+    console.log(formData);
     try {
       setLoading(true);
       const response = await client.post("/register/photo", formData, {
@@ -59,7 +62,8 @@ const AddProfilePhoto = () => {
         setIsSignedIn(true);
       }
     } catch (error) {
-      console.log(error.response.data);
+      console.log("Failed to add photo");
+      console.log(error.response);
       setLoading(false);
     }
   };

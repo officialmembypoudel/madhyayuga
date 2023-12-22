@@ -94,7 +94,7 @@ const CategoryComponent = () => {
         // style={{ backgroundColor: "pink" }}
         showsHorizontalScrollIndicator={false}
       >
-        {categories.map((category) => (
+        {categories.slice(0, 5).map((category) => (
           <TouchableOpacity key={category._id} style={styles.box}>
             <Avatar
               icon={{

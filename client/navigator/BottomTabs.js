@@ -8,6 +8,7 @@ import ProfileScreen from "../screens/ProfileScreen";
 import NewListings from "../screens/NewListings";
 import MyListings from "../screens/MyListings";
 import EditListingScreen from "../screens/EditListingScreen";
+import MessagesScreen from "../screens/MessagesScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -117,6 +118,16 @@ export default function BottomTabs() {
             );
           },
         }}
+      />
+      <Tab.Screen
+        name="Messages"
+        component={MessagesScreen}
+        options={({ route }) => ({
+          tabBarStyle: {
+            display: "none",
+          },
+          tabBarButton: () => null,
+        })}
       />
       <Tab.Screen
         name="Profile"
