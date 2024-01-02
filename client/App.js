@@ -73,6 +73,7 @@ import { Router } from "./navigator/StackNavigator";
 import { Provider } from "react-redux";
 import { store } from "./store";
 import ChatProvider from "./context/chatContext";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const theme = createTheme({
   lightColors: {
@@ -153,18 +154,20 @@ export default function App() {
     );
   } else {
     return (
-      <ThemeProvider theme={theme}>
-        <Provider store={store}>
-          <StatusBar style="auto" />
-          <NavigationContainer>
-            <AuthProvider>
-              <ChatProvider>
-                <Router />
-              </ChatProvider>
-            </AuthProvider>
-          </NavigationContainer>
-        </Provider>
-      </ThemeProvider>
+      <SafeAreaView style={{ flex: 1 }}>
+        <ThemeProvider theme={theme}>
+          <Provider store={store}>
+            <StatusBar style="auto" />
+            <NavigationContainer>
+              <AuthProvider>
+                <ChatProvider>
+                  <Router />
+                </ChatProvider>
+              </AuthProvider>
+            </NavigationContainer>
+          </Provider>
+        </ThemeProvider>
+      </SafeAreaView>
     );
   }
 }

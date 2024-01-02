@@ -7,59 +7,97 @@ import React, {
 } from "react";
 import io from "socket.io-client";
 import { AuthContext } from "./authContext";
-import { client } from "../configs/axios";
+import { client, serverAddress } from "../configs/axios";
 import { useNavigation } from "@react-navigation/native";
 
 export const ChatContext = createContext();
 
-const newSocket = io("http://localhost:4000");
-
 const ChatProvider = ({ children }) => {
   const navigation = useNavigation();
   const { user } = useContext(AuthContext);
-  const [chatRooms, setChatRooms] = useState([{ members: [] }]);
+  const [chatRooms, setChatRooms] = useState([]);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [newMessage, setNewMessage] = useState(null);
   const [recepient, setRecepient] = useState(null);
+  const [currentChatRoom, setCurrentChatRoom] = useState(null);
+  const [sendingMessage, setSendingMessage] = useState(false);
+  const [receivedMessage, setReceivedMessage] = useState(null);
 
   useEffect(() => {
+    const newSocket = io(serverAddress);
+
+    newSocket.on("connect", () => {
+      console.log("Socket connected");
+      newSocket.emit("addNewUser", user?._id);
+    });
+
+    newSocket.on("disconnect", () => {
+      console.log("Socket disconnected");
+    });
+
     setSocket(newSocket);
 
     return () => {
       newSocket.disconnect();
     };
-  }, [newSocket, user]);
+  }, [user]);
 
   useEffect(() => {
     if (socket) {
       socket.emit("addNewUser", user?._id);
       socket.on("onlineUsers", (users) => {
         setOnlineUsers(users);
-        console.log("running online users", users);
       });
     }
-    return () => socket?.off("onlineUsers");
+    return () => {
+      socket?.off("onlineUsers");
+    };
   }, [socket]);
 
   useEffect(() => {
     if (socket) {
       socket.emit("sendMessage", { newMessage, recepient });
+    }
+  }, [newMessage, recepient]);
+
+  useEffect(() => {
+    if (socket) {
       socket.on("newMessage", (message) => {
-        setMessages((prev) => [...prev, message]);
+        if (message.chatId !== currentChatRoom) return null;
+        setMessages((prevMessages) => [...prevMessages, message]);
+        console.log("new message", message);
+        setReceivedMessage(message);
       });
     }
-    return () => socket?.off("newMessage");
-  }, [socket, newMessage, recepient]);
+
+    return () => {
+      socket?.off("newMessage");
+      // setReceivedMessage(null);
+    };
+  }, [socket, currentChatRoom]);
+
+  useEffect(() => {
+    if (receivedMessage === null) return;
+    const newChatRooms = chatRooms.map((chatRoom) => {
+      if (chatRoom._id === receivedMessage?.chatId) {
+        return {
+          ...chatRoom,
+          lastMessage: receivedMessage?.message,
+          lastMessageTime: receivedMessage?.createdAt,
+        };
+      }
+      return chatRoom;
+    });
+    setChatRooms(newChatRooms);
+  }, [receivedMessage]);
 
   const getChatRooms = async () => {
     try {
-      console.log("running");
       const response = await client.get("/chats");
       setChatRooms(response.data.documents);
-      console.log(response.data.documents, "chatRooms");
     } catch (error) {
       console.log(error.response);
       console.log("error message");
@@ -74,8 +112,9 @@ const ChatProvider = ({ children }) => {
           user1: recepientId,
         }
       );
-      setChatRooms([...chatRooms, response.data.document]);
-      navigation.navigate("Chat");
+
+      response && getChatRooms();
+      response && navigation.navigate("Chat");
     } catch (err) {
       console.log(err.response);
     }
@@ -85,7 +124,7 @@ const ChatProvider = ({ children }) => {
       const response = await client.get(`/chats/messages/${chatId}`);
       setMessages(response.data.documents);
       setLoading(false);
-      ref.current.scrollToEnd({
+      ref?.current?.scrollToEnd({
         behavior: "smooth",
         block: "end",
         animated: "true",
@@ -97,12 +136,15 @@ const ChatProvider = ({ children }) => {
   };
   const addMessage = async (chatId, message, ref, recepientId) => {
     try {
+      setSendingMessage(true);
       const response = await client.post("/chats/messages/add", {
         chatId,
         sender: user._id,
         message,
       });
-      setMessages([...messages, response.data.document]);
+
+      setMessages((prevMessages) => [...prevMessages, response.data.document]);
+
       setNewMessage(response.data.document);
       setRecepient(recepientId);
       ref.current.scrollToEnd({
@@ -110,9 +152,21 @@ const ChatProvider = ({ children }) => {
         block: "end",
         animated: "true",
       });
-      console.log(recepientId, "recepient");
+      response && setSendingMessage(false);
+      const newChatRooms = chatRooms.map((chatRoom) => {
+        if (chatRoom._id === response?.data?.document?.chatId) {
+          return {
+            ...chatRoom,
+            lastMessage: response?.data?.document?.message,
+            lastMessageTime: response?.data?.document?.createdAt,
+          };
+        }
+        return chatRoom;
+      });
+      setChatRooms(newChatRooms);
     } catch (err) {
       console.log(err.response);
+      setSendingMessage(false);
     }
   };
 
@@ -126,7 +180,9 @@ const ChatProvider = ({ children }) => {
         messages,
         getMessages,
         addMessage,
+        sendingMessage,
         onlineUsers,
+        setCurrentChatRoom,
       }}
     >
       {children}

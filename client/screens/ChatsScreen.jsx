@@ -19,13 +19,12 @@ import { ChatContext } from "../context/chatContext";
 const ChatsScreen = () => {
   const style = useTheme();
   const { chatRooms, getChatRooms, onlineUsers } = useContext(ChatContext);
-  const navigation = useNavigation();
-  const [isDark, setIsDark] = useState(false);
-  const { mode, setMode } = useThemeMode();
 
   useEffect(() => {
     getChatRooms();
-  }, [onlineUsers]);
+  }, []);
+
+  console.log("here are the chat rooms", chatRooms.length);
 
   return (
     <View
@@ -35,19 +34,18 @@ const ChatsScreen = () => {
       }}
     >
       <ScreenHeaderComponent title="Chats" />
-      {chatRooms?.length > 0 ? (
-        <FlatList
-          style={{ width: "100%" }}
-          contentContainerStyle={{ padding: 2 }}
-          data={chatRooms}
-          keyExtractor={(item) => Date.now()}
-          renderItem={({ item }) => (
-            <View key={item?._id} style={{ width: "100%", marginBottom: 15 }}>
-              <ChatCard chats={item} />
-            </View>
-          )}
-        />
-      ) : null}
+
+      <FlatList
+        style={{ width: "100%" }}
+        contentContainerStyle={{ padding: 2 }}
+        data={chatRooms}
+        keyExtractor={(item) => item?._id}
+        renderItem={({ item }) => (
+          <View key={item?._id} style={{ width: "100%", marginBottom: 15 }}>
+            <ChatCard chats={item} />
+          </View>
+        )}
+      />
     </View>
   );
 };

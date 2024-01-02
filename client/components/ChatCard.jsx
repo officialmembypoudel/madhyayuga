@@ -28,22 +28,21 @@ const ChatCard = ({ chats }) => {
   const { mode } = useThemeMode();
   const [sender, setSender] = useState("");
   const [isReceiverOnline, setIsReceiverOnline] = useState(false);
-  const [receiver, setReceiver] = useState("");
 
   useEffect(() => {
-    setSender(chats.members.filter((member) => member._id !== user._id)[0]);
+    setSender(chats?.members.filter((member) => member._id !== user?._id)[0]);
   }, [chats]);
-  console.log("chats", onlineUsers);
+
   useEffect(() => {
     const otherUser = chats?.members.filter(
       (member) => member._id !== user._id
     )[0];
 
-    let isUserOnline = onlineUsers?.some((u) => u.user === otherUser?._id);
+    const isUserOnline = onlineUsers?.some((u) => u.user === otherUser?._id);
 
     setIsReceiverOnline(isUserOnline);
-    setReceiver(otherUser);
   }, [chats, onlineUsers?.length]);
+
   return (
     <TouchableOpacity
       style={{
@@ -78,27 +77,18 @@ const ChatCard = ({ chats }) => {
           justifyContent: "space-between",
         }}
       >
-        <View style={{ ...flexDirection }}>
+        <View style={{ ...flexDirection, gap: 10 }}>
           {chats?.listing?.images ? (
             <Avatar
               size={"large"}
               rounded
-              icon={{
-                name: "person-circle",
-                type: "ionicon",
-                color: style.theme.colors.warning,
-                size: 60,
-              }}
               source={{ uri: setImageQuality(chats.listing.images[0].url, 30) }}
               containerStyle={{
-                padding: 0,
-                width: 55,
-                height: 60,
-                borderRadius: 30,
-                marginRight: 10,
-              }}
-              iconStyle={{
-                alignSelf: "center",
+                elevation: 0,
+                shadowOpacity: 0,
+                shadowOffset: 0,
+                borderWidth: 1.7,
+                borderColor: style.theme.colors.primary,
               }}
             >
               {isReceiverOnline ? (
@@ -111,7 +101,7 @@ const ChatCard = ({ chats }) => {
                     height: 15,
                     borderRadius: 30,
                     backgroundColor: "transparent",
-                    marginBottom: 40,
+                    marginRight: 5.5,
                   }}
                   iconStyle={{
                     color: "limegreen",

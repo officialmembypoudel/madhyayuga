@@ -13,7 +13,7 @@ configureCloudinary();
 connectDatabase();
 
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, { cors: { origin: "*" } });
 
 let users = [];
 // Set up Socket.IO event handling
@@ -21,31 +21,31 @@ io.on("connection", (socket) => {
   socket.on("addNewUser", (user) => {
     if (!users.find((u) => u.user === user)) {
       users.push({ id: socket.id, user });
-      console.log("onlineUsers", users);
-      socket.emit("onlineUsers", users);
     }
+    io.emit("onlineUsers", users);
   });
 
   socket.on("sendMessage", (message) => {
-    const recepient = users.find((u) => u.user === message?.recepient);
-    console.log("recepient", message?.recepient);
-    console.log("message", message);
-    console.log("recepient", recepient);
-    console.log("users", users);
-    if (recepient) {
-      socket.to(recepient.id).emit("newMessage", message.newMessage);
+    const recepient = users
+      .filter((u) => u.user === message?.recepient)
+      .map((u) => u.id);
+
+    if (recepient.length > 0) {
+      if (recepient.length > 1) {
+        io.to(recepient).emit("newMessage", message.newMessage);
+      } else {
+        io.to(recepient[0]).emit("newMessage", message.newMessage);
+      }
     }
   });
+
   // Handle disconnection
   socket.on("disconnect", () => {
     console.log("User disconnected");
     users = users.filter((u) => u.id !== socket.id);
-    console.log("online users", users);
     io.emit("onlineUsers", users);
   });
 });
 server.listen(process.env.PORT, () => {
   console.log("server is running on port " + process.env.PORT);
 });
-
-console.log("onlineUsers", users);

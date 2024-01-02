@@ -18,7 +18,6 @@ const AuthProvider = ({ children }) => {
     const getUser = async () => {
       try {
         const response = await client.get("/profile");
-        console.log(response.data.user);
         setUser(response.data.user);
         if (response.data.user) {
           setLoading(false);

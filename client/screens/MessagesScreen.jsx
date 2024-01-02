@@ -33,17 +33,36 @@ const MessagesScreen = ({ route }) => {
   const style = useTheme();
   const chat = route.params.chat;
   const { user } = useContext(AuthContext);
-  const { messages, getMessages, addMessage, loading } =
-    useContext(ChatContext);
+  const {
+    messages,
+    getMessages,
+    addMessage,
+    loading,
+    setCurrentChatRoom,
+    sendingMessage,
+    onlineUsers,
+  } = useContext(ChatContext);
   const navigation = useNavigation();
   const messagesRef = useRef(null);
   const [isDark, setIsDark] = useState(false);
   const { mode, setMode } = useThemeMode();
   const [newMessage, setNewMessage] = useState("");
+  const [isReceiverOnline, setIsReceiverOnline] = useState(false);
 
   useEffect(() => {
     getMessages(chat._id, messagesRef);
+    setCurrentChatRoom(chat._id);
   }, [chat]);
+
+  useEffect(() => {
+    const otherUser = chat?.members.filter(
+      (member) => member._id !== user._id
+    )[0];
+
+    const isUserOnline = onlineUsers?.some((u) => u.user === otherUser?._id);
+
+    setIsReceiverOnline(isUserOnline);
+  }, [chat, onlineUsers?.length]);
 
   return (
     <View
@@ -69,7 +88,29 @@ const MessagesScreen = ({ route }) => {
               size="medium"
               rounded
               source={{ uri: setImageQuality(chat?.listing?.images[0].url) }}
-            />
+              containerStyle={{
+                borderWidth: 1.7,
+                borderColor: style.theme.colors.primary,
+              }}
+            >
+              {isReceiverOnline ? (
+                <Avatar.Accessory
+                  style={{
+                    elevation: 0,
+                    shadowOpacity: 0,
+                    shadowOffset: 0,
+                    width: 15,
+                    height: 15,
+                    borderRadius: 30,
+                    backgroundColor: "transparent",
+                  }}
+                  iconStyle={{
+                    color: "limegreen",
+                  }}
+                  iconProps={{ name: "lens", size: 15 }}
+                />
+              ) : null}
+            </Avatar>
             <View
               style={{
                 flex: 1,
@@ -107,76 +148,78 @@ const MessagesScreen = ({ route }) => {
               height: "100%",
             }}
           >
-            <FlatList
-              showsVerticalScrollIndicator={false}
-              scrollsToTop={false}
-              ref={messagesRef}
-              onContentSizeChange={() =>
-                messagesRef.current.scrollToEnd({
-                  animated: true,
-                  block: "end",
-                  behaviour: "smooth",
-                })
-              }
-              style={{ width: "100%" }}
-              data={messages}
-              keyExtractor={(item) => item?._id}
-              renderItem={({ item }) => (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "flex-start",
-                    gap: 5,
-                    marginBottom: 10,
-                    justifyContent:
-                      item?.sender === user?._id ? "flex-end" : "flex-start",
-                  }}
-                >
-                  {item?.sender !== user?._id ? (
-                    <Avatar
-                      size="small"
-                      rounded
-                      source={{
-                        uri: setImageQuality(chat?.sender?.avatar, 35),
-                      }}
-                    />
-                  ) : null}
-                  <Card
-                    containerStyle={{
-                      margin: 0,
-                      padding: 10,
-                      backgroundColor:
-                        item?.sender !== user?._id ? "#aeb9cc" : "#218aff",
-                      borderWidth: 0,
-                      borderRadius: 10,
-                      width: "75%",
-                      elevation: 0,
+            {messages[0]?.message ? (
+              <FlatList
+                showsVerticalScrollIndicator={false}
+                scrollsToTop={false}
+                ref={messagesRef}
+                onContentSizeChange={() =>
+                  messagesRef.current.scrollToEnd({
+                    animated: true,
+                    block: "end",
+                    behaviour: "smooth",
+                  })
+                }
+                style={{ width: "100%" }}
+                data={messages}
+                keyExtractor={(item, index) => item?._id || index.toString()}
+                renderItem={({ item }) => (
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "flex-start",
+                      gap: 5,
+                      marginBottom: 10,
+                      justifyContent:
+                        item?.sender === user?._id ? "flex-end" : "flex-start",
                     }}
                   >
-                    <Text
-                      style={{
-                        fontFamily: `${defaultFont}_400Regular`,
-                        color:
-                          item?.sender !== user?._id ? "#1a1a1a" : "#f3f3f3",
+                    {item?.sender !== user?._id ? (
+                      <Avatar
+                        size="small"
+                        rounded
+                        source={{
+                          uri: setImageQuality(chat?.sender?.avatar, 35),
+                        }}
+                      />
+                    ) : null}
+                    <Card
+                      containerStyle={{
+                        margin: 0,
+                        padding: 10,
+                        backgroundColor:
+                          item?.sender !== user?._id ? "#aeb9cc" : "#218aff",
+                        borderWidth: 0,
+                        borderRadius: 10,
+                        width: "75%",
+                        elevation: 0,
                       }}
                     >
-                      {item?.message}
-                    </Text>
-                    <Text
-                      style={{
-                        fontFamily: `${defaultFont}_400Regular`,
-                        fontSize: 10,
-                        textAlign: "right",
-                        color:
-                          item?.sender !== user?._id ? "#1a1a1a" : "#f3f3f3",
-                      }}
-                    >
-                      {new Date(item?.createdAt).toDateString()}
-                    </Text>
-                  </Card>
-                </View>
-              )}
-            />
+                      <Text
+                        style={{
+                          fontFamily: `${defaultFont}_400Regular`,
+                          color:
+                            item?.sender !== user?._id ? "#1a1a1a" : "#f3f3f3",
+                        }}
+                      >
+                        {item?.message}
+                      </Text>
+                      <Text
+                        style={{
+                          fontFamily: `${defaultFont}_400Regular`,
+                          fontSize: 10,
+                          textAlign: "right",
+                          color:
+                            item?.sender !== user?._id ? "#1a1a1a" : "#f3f3f3",
+                        }}
+                      >
+                        {new Date(item?.createdAt).toDateString()}
+                      </Text>
+                    </Card>
+                  </View>
+                )}
+              />
+            ) : null}
           </View>
           <Card
             containerStyle={{
@@ -191,7 +234,7 @@ const MessagesScreen = ({ route }) => {
                   : style.theme.colors.background,
               borderWidth: 0,
               borderRadius: 10,
-              elevation: 1,
+              elevation: 4,
             }}
             wrapperStyle={{
               flexDirection: "row",
@@ -239,13 +282,9 @@ const MessagesScreen = ({ route }) => {
                 />
               }
               clearIcon={
-                <Icon
-                  name="send"
-                  color={
-                    mode === "dark"
-                      ? style.theme.colors.grey0
-                      : style.theme.colors.primary
-                  }
+                <Button
+                  loading={sendingMessage}
+                  type="clear"
                   onPress={() => {
                     addMessage(
                       chat._id,
@@ -255,9 +294,18 @@ const MessagesScreen = ({ route }) => {
                     );
                     setNewMessage("");
                   }}
-                  // reverseColor
-                  containerStyle={{ borderRadius: 30 }}
-                />
+                >
+                  <Icon
+                    name="send"
+                    color={
+                      mode === "dark"
+                        ? style.theme.colors.grey0
+                        : style.theme.colors.primary
+                    }
+                    // reverseColor
+                    containerStyle={{ borderRadius: 30 }}
+                  />
+                </Button>
               }
               inputStyle={{
                 color: style.theme.colors.grey0,

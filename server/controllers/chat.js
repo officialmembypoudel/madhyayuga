@@ -42,7 +42,7 @@ export const createChatRoom = async (req, res) => {
       return res.status(200).json({
         success: false,
         message: "Chat already exists!",
-        documents: chat,
+        document: chat,
       });
     }
     chat = await chatModel.create({
@@ -70,7 +70,7 @@ export const createChatRoom = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Chat added successfully",
-      documents: chat,
+      document: chat,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -92,7 +92,8 @@ export const findChatRoom = async (req, res) => {
       .find({
         members: { $in: [user] },
       })
-      .populate("listing");
+      .populate("listing")
+      .sort({ updatedAt: -1 });
 
     if (!chat.length) {
       return res.status(200).json({
@@ -101,21 +102,10 @@ export const findChatRoom = async (req, res) => {
       });
     }
 
-    let lastMessages = await messageModel
-      .find({ chatId: chat[0]._id })
-      .sort({ createdAt: -1 })
-      .limit(1);
-
-    if (!lastMessages.length) {
-      lastMessages = {
-        message: "No messages",
-        createdAt: Date.now(),
-      };
-    }
-
     for (let i = 0; i < chat.length; i++) {
       const user1 = await userModel.findById(chat[i].members[0]);
       const user2 = await userModel.findById(chat[i].members[1]);
+
       chat[i].members[0] = {
         name: user1.name,
         email: user1.email,
@@ -131,13 +121,30 @@ export const findChatRoom = async (req, res) => {
         phone: user2.phone,
       };
     }
-    chat = chat.map((c) => {
-      return {
-        ...c._doc,
-        lastMessage: lastMessages[0]?.message,
-        lastMessageTime: lastMessages[0]?.createdAt,
-      };
-    });
+    chat = await Promise.all(
+      chat.map(async (c) => {
+        let lastMessages = await messageModel
+          .find({ chatId: c._id })
+          .sort({ createdAt: -1 })
+          .limit(1);
+
+        if (!lastMessages.length) {
+          lastMessages = [
+            {
+              message: "No messages",
+              createdAt: Date.now(),
+            },
+          ];
+        }
+
+        return {
+          ...c._doc,
+          lastMessage: lastMessages[0]?.message,
+          lastMessageTime: lastMessages[0]?.createdAt,
+        };
+      })
+    );
+
     return res.status(200).json({
       success: true,
       message: "Chats found successfully!",
