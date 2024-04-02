@@ -20,7 +20,7 @@ import { AuthContext } from "../context/authContext";
 
 const ProfileScreen = () => {
   const style = useTheme();
-  const { logOut } = useContext(AuthContext);
+  const { logOut, user } = useContext(AuthContext);
   const navigation = useNavigation();
   const [isDark, setIsDark] = useState(false);
   const { mode, setMode } = useThemeMode();
@@ -71,6 +71,9 @@ const ProfileScreen = () => {
           icon="account-details"
           iconType="material-community"
           title="My Account details"
+          onPress={() =>
+            navigation.navigate("AccountDetails", { user, goBack: "Profile" })
+          }
         />
         <ProfileItemsCards
           iconBackgroundColor={style.theme.colors.success}
@@ -80,6 +83,14 @@ const ProfileScreen = () => {
           title="My Listings"
           onPress={() => navigation.navigate("myListings")}
         />
+        <ProfileItemsCards
+          iconBackgroundColor={style.theme.colors.error}
+          iconColor={style.theme.colors.disabled}
+          icon="heart"
+          iconType="ionicon"
+          title="My Favourites"
+          onPress={() => navigation.navigate("Favourites")}
+        />
         {/* <ProfileItemsCards
           iconBackgroundColor={style.theme.colors.warning}
           iconColor={style.theme.colors.disabled}
@@ -88,7 +99,7 @@ const ProfileScreen = () => {
           iconType="material-community"
         /> */}
         <ProfileItemsCards
-          iconBackgroundColor={style.theme.colors.error}
+          iconBackgroundColor={style.theme.colors.grey3}
           iconColor={style.theme.colors.disabled}
           icon="privacy-tip"
           iconType="material"

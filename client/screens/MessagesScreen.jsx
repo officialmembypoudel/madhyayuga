@@ -6,7 +6,7 @@ import {
   Touchable,
   TouchableOpacity,
   Platform,
-  Keyboard,
+  KeyboardAvoidingView,
 } from "react-native";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { containerStyles } from "../helpers/objects";
@@ -65,7 +65,8 @@ const MessagesScreen = ({ route }) => {
   }, [chat, onlineUsers?.length]);
 
   return (
-    <View
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{
         ...containerStyles,
         backgroundColor: style.theme.colors.background,
@@ -319,7 +320,7 @@ const MessagesScreen = ({ route }) => {
           </Card>
         </View>
       ) : null}
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

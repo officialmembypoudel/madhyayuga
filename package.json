@@ -5,12 +5,15 @@
   "main": "index.js",
   "scripts": {
     "server": "cd server && brew services start mongodb/brew/mongodb-community && npm start",
-    "client": "cd client && npx expo start"
+    "client": "cd client && npx expo start",
+    "admin": "cd admin && npm run dev"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "next-client-cookies": "^1.1.0",
+    "react-native-snackbar": "^2.6.2",
     "react-native-virtualized-view": "^1.0.0"
   }
 }

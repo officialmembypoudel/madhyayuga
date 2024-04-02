@@ -1,4 +1,10 @@
-import { StyleSheet, View, Image, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Image,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+} from "react-native";
 import React, { useContext, useState } from "react";
 import { containerStyles } from "../helpers/objects";
 import {
@@ -25,6 +31,7 @@ const VerifyOTP = () => {
   const { mode, setMode } = useThemeMode();
   const [otp, setOTP] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const VerifyOTP = async () => {
     setLoading(true);
@@ -45,19 +52,22 @@ const VerifyOTP = () => {
           setUser(response.data.user);
           navigation.navigate("AddProfilePhoto");
           setLoading(false);
+          setError(null);
         }
       } else {
         console.log("no otp");
         setLoading(false);
       }
     } catch (error) {
-      console.log(error.response.data);
+      console.log(error?.response?.data);
       setLoading(false);
+      setError(error?.response?.data?.message);
     }
   };
 
   return (
-    <View
+    <KeyboardAvoidingView
+      behavior="padding"
       style={{
         ...containerStyles,
         backgroundColor: style.theme.colors.background,
@@ -117,6 +127,7 @@ const VerifyOTP = () => {
             keyboardType="phone-pad"
             containerStyle={{ paddingHorizontal: 0, marginBottom: 0 }}
             inputStyle={{ fontFamily: `${defaultFont}_400Regular` }}
+            errorMessage={error}
           />
           <Text
             style={{
@@ -181,7 +192,7 @@ const VerifyOTP = () => {
           color="success"
         />
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

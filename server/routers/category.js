@@ -9,7 +9,7 @@ import {
 
 const router = express.Router();
 
-router.route("/categories").get(isAuthenticated, getCategories);
+router.route("/categories").get(getCategories);
 
 router.route("/categories/add").post(isAuthenticated, addCategory);
 

@@ -29,10 +29,11 @@ import { ID } from "appwrite";
 import { AuthContext } from "../context/authContext";
 import { useDispatch } from "react-redux";
 import { fetchAllListings, userListings } from "../store/listings";
+import { client } from "../configs/axios";
 
 const defaultInputs = {
   name: "",
-  for: "",
+  with: "",
   description: "",
   condition: "",
   location: "",
@@ -55,34 +56,26 @@ const EditListingScreen = ({ route }) => {
     setNewListing({ ...item });
   }, [item]);
 
-  const updateListing = () => {
+  const updateListing = async () => {
     setLoading(true);
-    const promise = databases.updateDocument(
-      "madhyayuga",
-      "listings",
-      item.$id,
-      {
-        name: newListing.name,
-        description: newListing.description,
-        for: newListing.for,
-        condition: newListing.condition,
-        location: newListing.location,
-      }
-    );
-    promise.then(
-      (res) => {
-        console.log(res);
-        dispatch(fetchAllListings({ limit: 100 }));
-        dispatch(userListings({ userId: user.$id }));
-        setNewListing({ ...defaultInputs });
+    try {
+      const response = await client.put(
+        `/listings/update/${item._id}`,
+        newListing
+      );
+      console.log(response.data);
+      if (response.data.success) {
+        dispatch(fetchAllListings());
+        dispatch(userListings());
         setLoading(false);
         navigation.navigate("myListings");
-      },
-      (error) => {
-        console.log("listing upload error", error);
-        setLoading(false);
+      } else {
+        console.log(response.data.message);
       }
-    );
+    } catch (error) {
+      console.log(error.data.message);
+      setLoading(false);
+    }
   };
   console.log(newListing);
   return (
@@ -170,9 +163,9 @@ const EditListingScreen = ({ route }) => {
             For
           </Text>
           <Input
-            value={newListing.for}
+            value={newListing.with}
             onChangeText={(forItem) =>
-              setNewListing({ ...newListing, for: forItem })
+              setNewListing({ ...newListing, with: forItem })
             }
             inputContainerStyle={{
               borderWidth: 2,

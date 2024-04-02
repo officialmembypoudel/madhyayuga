@@ -27,14 +27,6 @@ const userSchema = new mongoose.Schema({
     public_id: String,
     url: String,
   },
-  tasks: [
-    {
-      title: String,
-      description: String,
-      completed: Boolean,
-      createdAt: Date,
-    },
-  ],
   createdAt: {
     type: Date,
     default: Date.now,
@@ -47,6 +39,10 @@ const userSchema = new mongoose.Schema({
   },
   forget_password_otp: Number,
   forget_password_otp_expiry: Date,
+  isAdmin: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 userSchema.pre("save", async function (next) {

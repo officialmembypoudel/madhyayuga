@@ -1,0 +1,28 @@
+{
+  "name": "madhyayuga-admin",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/cache": "latest",
+    "@emotion/react": "latest",
+    "@emotion/styled": "latest",
+    "@mui/icons-material": "latest",
+    "@mui/material": "latest",
+    "@mui/material-nextjs": "latest",
+    "@mui/x-data-grid": "^6.19.6",
+    "axios": "^1.6.7",
+    "cookies-next": "^4.1.1",
+    "eslint": "latest",
+    "eslint-config-next": "latest",
+    "material-icons": "^1.13.12",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  }
+}

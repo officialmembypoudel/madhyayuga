@@ -4,6 +4,7 @@ import {
   View,
   Image,
   ScrollView,
+  TextInput,
 } from "react-native";
 import React, { useContext, useState } from "react";
 import { containerStyles } from "../helpers/objects";
@@ -23,6 +24,20 @@ import noInternetImg from "../assets/please-login.png";
 import { defaultFont } from "../fontConfig/defaultFont";
 import homeIcon from "../assets/madhyaYugTransparent.png";
 import { AuthContext } from "../context/authContext";
+import * as yup from "yup";
+import { Controller, useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+
+const schema = yup.object().shape({
+  email: yup
+    .string()
+    .required("Email is required!")
+    .email("Please enter a valid email address!"),
+  password: yup
+    .string()
+    .required("Password is required!")
+    .min(8, "Password must contain at least 8 characters"),
+});
 
 const LoginScreen = () => {
   const style = useTheme();
@@ -33,7 +48,20 @@ const LoginScreen = () => {
   // const { mode, setMode } = useThemeMode();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login, user } = auth;
+  const { login, user, loadLogin, loginMessage, setLoginMessage } = auth;
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    trigger,
+  } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   return (
     <View
@@ -110,45 +138,87 @@ const LoginScreen = () => {
           </Text>
         </View>
         <View style={{ width: "100%", alignSelf: "center" }}>
-          <Input
-            value={email}
-            onChangeText={(email) => setEmail(email)}
-            inputContainerStyle={{
-              borderWidth: 2,
-              borderRadius: 5,
-              borderBottomWidth: 2,
-              paddingHorizontal: 5,
-              borderColor: theme.colors.grey4,
-              backgroundColor: theme.colors.grey4,
+          <View>
+            <Controller
+              control={control}
+              rules={{
+                required: true,
+              }}
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  value={value}
+                  onChangeText={async (value) => {
+                    onChange(value);
+                    await trigger("email");
+                    setLoginMessage(null);
+                  }}
+                  inputContainerStyle={{
+                    borderWidth: 2,
+                    borderRadius: 5,
+                    borderBottomWidth: 2,
+                    paddingHorizontal: 5,
+                    borderColor: theme.colors.grey4,
+                    backgroundColor: theme.colors.grey4,
+                  }}
+                  leftIcon={<Icon name="mail" type="feather" />}
+                  placeholder="email"
+                  keyboardType="email-address"
+                  containerStyle={{ paddingHorizontal: 0, marginBottom: 5 }}
+                  inputStyle={{ fontFamily: `${defaultFont}_400Regular` }}
+                  autoCapitalize="none"
+                  errorMessage={errors.email?.message}
+                  errorStyle={{ fontFamily: `${defaultFont}_400Regular` }}
+                />
+              )}
+              name="email"
+            />
+          </View>
+          <Controller
+            control={control}
+            rules={{
+              required: true,
             }}
-            leftIcon={<Icon name="mail" type="feather" />}
-            // errorMessage="Fuck@nigga.com"
-            placeholder="email"
-            keyboardType="email-address"
-            containerStyle={{ paddingHorizontal: 0, marginBottom: 5 }}
-            inputStyle={{ fontFamily: `${defaultFont}_400Regular` }}
-            autoCapitalize="none"
+            render={({ field: { onChange, value } }) => (
+              <Input
+                value={value}
+                onChangeText={async (value) => {
+                  onChange(value);
+                  await trigger("password");
+                  setLoginMessage(null);
+                }}
+                inputContainerStyle={{
+                  borderWidth: 2,
+                  borderRadius: 5,
+                  borderBottomWidth: 2,
+                  borderColor: theme.colors.grey4,
+                  backgroundColor: theme.colors.grey4,
+                  paddingHorizontal: 5,
+                }}
+                leftIcon={<Icon name="lock" type="feather" />}
+                placeholder="password"
+                // errorMessage="incorrect password"
+                containerStyle={{ paddingHorizontal: 0 }}
+                inputStyle={{ fontFamily: `${defaultFont}_400Regular` }}
+                secureTextEntry={true}
+                autoCapitalize="none"
+                errorMessage={errors.password?.message}
+                errorStyle={{ fontFamily: `${defaultFont}_400Regular` }}
+              />
+            )}
+            name="password"
           />
-          <Input
-            value={password}
-            onChangeText={(password) => setPassword(password)}
-            inputContainerStyle={{
-              borderWidth: 2,
-              borderRadius: 5,
-              borderBottomWidth: 2,
-              borderColor: theme.colors.grey4,
-              backgroundColor: theme.colors.grey4,
-              paddingHorizontal: 5,
-            }}
-            leftIcon={<Icon name="lock" type="feather" />}
-            placeholder="password"
-            // errorMessage="incorrect password"
-            containerStyle={{ paddingHorizontal: 0 }}
-            inputStyle={{ fontFamily: `${defaultFont}_400Regular` }}
-            secureTextEntry={true}
-            autoCapitalize="none"
-          />
+          {loginMessage ? (
+            <Text
+              style={{
+                fontFamily: `${defaultFont}_400Regular`,
+                color: style.theme.colors.error,
+              }}
+            >
+              {loginMessage}
+            </Text>
+          ) : null}
           <Button
+            loading={loadLogin}
             title="Login"
             titleStyle={{
               fontFamily: `${defaultFont}_500Medium`,
@@ -159,7 +229,9 @@ const LoginScreen = () => {
             }}
             buttonStyle={{ paddingVertical: 13 }}
             onPress={() => {
-              login(email, password);
+              handleSubmit((data) => {
+                login(data.email, data.password);
+              })();
               console.log("navigate to Home screen");
             }}
           />

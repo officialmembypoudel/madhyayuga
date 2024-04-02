@@ -21,6 +21,7 @@ import { AuthContext } from "../context/authContext";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAllListings,
+  fetchLocations,
   getAllListings,
   updateViews,
 } from "../store/listings";
@@ -84,6 +85,7 @@ const HomeComponent = () => {
 
   useEffect(() => {
     dispatch(fetchAllListings({ limit: 5 }));
+    dispatch(fetchLocations());
   }, [dispatch]);
   // console.log(allListings);
   const handleOnPress = (state) => {
@@ -151,7 +153,6 @@ const HomeComponent = () => {
       {allListings && (
         <>
           <CategoryComponent />
-          <ScrollView></ScrollView>
           <FlatList
             style={{
               width: "100%",

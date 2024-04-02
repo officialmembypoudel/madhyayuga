@@ -119,7 +119,12 @@ const MyListings = () => {
         backgroundColor: style.theme.colors.background,
       }}
     >
-      <ScreenHeaderComponent title="My Listings" />
+      <ScreenHeaderComponent
+        title="My Listings"
+        backAction={() => {
+          navigation.navigate("Profile");
+        }}
+      />
       {allListings && (
         <FlatList
           style={{ width: "100%" }}

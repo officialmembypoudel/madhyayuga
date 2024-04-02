@@ -3,6 +3,19 @@ import { listingsModel } from "../models/listings.js";
 
 export const addListing = async (req, res) => {
   try {
+    if (
+      !req.body.name ||
+      !req.body.description ||
+      !req.body.condition ||
+      !req.body.with ||
+      !req.body.location ||
+      !req.body.categoryId ||
+      !req.file
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Please provide all the details!" });
+    }
     const avatar = req.file;
     let listing = await listingsModel.create({
       name: req.body.name,
@@ -66,7 +79,8 @@ export const getMyListings = async (req, res) => {
   try {
     const listing = await listingsModel
       .find({ userId: req.user._id })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .populate("userId", "name email avatar phone");
 
     if (!listing) {
       res
@@ -88,19 +102,34 @@ export const updateListing = async (req, res) => {
   // TODO add more logic for file upload
   try {
     const { listingId } = req.params;
-    // console.log(req.body);
-    const parser = multer({ dest: "/uploads" });
-    parser.single("image");
-    // console.log(req.file);
-    // const listing = await listingsModel.findByIdAndUpdate(listingId, req.body, {
-    //   new: true,
-    // });
+    const listing = await listingsModel.findByIdAndUpdate(listingId, req.body, {
+      new: true,
+    });
 
-    // res.status(201).json({
-    //   success: true,
-    //   message: "Updated listing successfully",
-    //   documents: listing,
-    // });
+    res.status(201).json({
+      success: true,
+      message: "Updated listing successfully",
+      documents: listing,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+export const updateListingViews = async (req, res) => {
+  // TODO add more logic for file upload
+  try {
+    const { listingId } = req.params;
+    const listing = await listingsModel.findByIdAndUpdate(
+      listingId,
+      { $inc: { views: 1 } },
+      { new: true }
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "Updated listing successfully",
+      documents: listing,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -119,7 +148,7 @@ export const deleteListing = async (req, res) => {
       });
     }
 
-    if (listing.userId !== req.user._id.toString()) {
+    if (listing.userId.toString() !== req.user._id.toString()) {
       return res.status(400).json({
         success: false,
         message: "You are not authorized to delete this listing!",

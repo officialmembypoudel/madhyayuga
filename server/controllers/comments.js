@@ -4,7 +4,7 @@ import { commentModel } from "../models/comments.js";
 export const addComment = async (req, res) => {
   // Implementation for adding comments
   try {
-    const { listingId, type, text } = req.body;
+    const { listingId, type, text, commentId } = req.body;
 
     if (!listingId || !type || !text) {
       return res.status(400).json({
@@ -26,7 +26,7 @@ export const addComment = async (req, res) => {
       });
     }
     if (type === "reply") {
-      let comment = await commentModel.findById(listingId);
+      let comment = await commentModel.findById(commentId);
 
       if (!comment) {
         return res.status(400).json({
@@ -34,6 +34,7 @@ export const addComment = async (req, res) => {
           message: "Comment does not exist!",
         });
       }
+
       comment.replies.push({
         text,
         user: req.user._id,
@@ -55,7 +56,11 @@ export const getAllComments = async (req, res) => {
   // Implementation for getting all comments
   try {
     const { listingId } = req.params;
-    const comments = await commentModel.find({ listingId }).populate("user");
+    const comments = await commentModel
+      .find({ listingId })
+      .populate("user")
+      .populate("replies.user")
+      .sort({ createdAt: -1 });
     const total = await commentModel.countDocuments({ listingId });
 
     res.status(200).json({

@@ -33,7 +33,7 @@ import { setImageQuality, textTrimmer } from "../helpers/functions";
 import { SearchBarAndroid } from "@rneui/base/dist/SearchBar/SearchBar-android";
 import { databases } from "../configs/appwrite";
 import { useDispatch, useSelector } from "react-redux";
-import { updateViews } from "../store/listings";
+import { fetchFavourites, updateViews } from "../store/listings";
 import NewListings from "./NewListings";
 import { client } from "../configs/axios";
 import { fetchAllComments, getAllComments } from "../store/comments";
@@ -41,9 +41,22 @@ import { ChatContext } from "../context/chatContext";
 import ItemDetailsTab from "../components/ItemDetailsTab";
 import StyledCard from "../components/StyledCard";
 
-export const CommentComponent = ({ comment }) => {
+export const CommentComponent = ({ comment, replyTo, setReplyTo }) => {
   const { mode } = useThemeMode();
   const { theme } = useTheme();
+
+  const handleCommentMode = () => {
+    if (replyTo) {
+      if (replyTo?._id === comment?._id) {
+        setReplyTo(null);
+      } else {
+        setReplyTo(comment);
+      }
+    } else {
+      setReplyTo(comment);
+    }
+  };
+
   return (
     <View>
       <View
@@ -77,7 +90,7 @@ export const CommentComponent = ({ comment }) => {
             {comment?.user?.name}
           </Text>
           <Text style={{ fontFamily: `${defaultFont}_400Regular` }}>
-            {comment.text}
+            {comment?.text}
           </Text>
         </Card>
       </View>
@@ -88,8 +101,70 @@ export const CommentComponent = ({ comment }) => {
           marginEnd: "10%",
         }}
       >
-        <ThemedButton title="Reply" type="clear" />
+        <ThemedButton
+          onPress={handleCommentMode}
+          title={replyTo?._id === comment?._id ? "Cancel" : "Reply"}
+          type="clear"
+          titleStyle={{
+            color:
+              replyTo?._id === comment?._id ? "#dc3545" : theme.colors.primary,
+            fontFamily: `${defaultFont}_500Medium`,
+            fontSize: 14,
+          }}
+          size="sm"
+          icon={
+            <Icon
+              name={replyTo?._id === comment?._id ? "x-circle-fill" : "reply"}
+              type="octicon"
+              size={14}
+              color={
+                replyTo?._id === comment?._id ? "#dc3545" : theme.colors.primary
+              }
+              style={{ paddingHorizontal: 4 }}
+            />
+          }
+        />
       </View>
+      {comment?.replies?.map((reply) => (
+        <View
+          key={reply?._id}
+          style={{
+            flexDirection: "row",
+            alignItems: "flex-start",
+            margin: 1,
+            gap: 5,
+            marginBottom: 10,
+            marginLeft: 30,
+          }}
+        >
+          <Avatar
+            size="medium"
+            rounded
+            title="PIC"
+            source={{ uri: setImageQuality(reply?.user?.avatar?.url, 35) }}
+            containerStyle={{ backgroundColor: "rgb(0,0,0,0)" }}
+          />
+          <Card
+            containerStyle={{
+              borderWidth: 0,
+              margin: 0,
+              borderRadius: 10,
+              width: 220,
+              padding: 10,
+              backgroundColor:
+                mode === "dark" ? theme.colors.grey3 : theme.colors.background,
+            }}
+            // wrapperStyle={{ backgroundColor: "red" }}
+          >
+            <Text style={{ fontFamily: `${defaultFont}_600SemiBold` }}>
+              {reply?.user?.name}
+            </Text>
+            <Text style={{ fontFamily: `${defaultFont}_400Regular` }}>
+              {reply?.text}
+            </Text>
+          </Card>
+        </View>
+      ))}
     </View>
   );
 };
@@ -354,7 +429,13 @@ const CustomTabNavigation = ({ item }) => {
 //   );
 // };
 
-const NormalDataTextComponent = ({ title, text, fontFamily, fontSize }) => {
+export const NormalDataTextComponent = ({
+  title,
+  text,
+  fontFamily,
+  fontSize,
+  noSemicolon,
+}) => {
   const style = useTheme();
   return (
     <Text
@@ -369,7 +450,7 @@ const NormalDataTextComponent = ({ title, text, fontFamily, fontSize }) => {
       selectable
       selectionColor={style.theme.colors.error}
     >
-      {`${title ? title + ": " : ""} ${text}`}
+      {`${title ? title + (!noSemicolon ? ": " : "") : ""} ${text}`}
     </Text>
   );
 };
@@ -385,10 +466,63 @@ const ItemDisplayScreen = ({ route }) => {
   const screenWidth = Dimensions.get("window").width;
   const [newItem, setNewItem] = useState({ ...item });
   const [user, setUser] = useState({});
+  const [favorite, setFavorite] = useState(false);
 
   useEffect(() => {
     setUser(item?.userId);
+    const updateViews = async () => {
+      try {
+        await client.patch(`/listings/update/views/${item?._id}`);
+      } catch (error) {
+        console.log(error?.response?.data);
+      }
+    };
+    updateViews();
+    console.log("running", "item");
   }, [item]);
+  useEffect(() => {
+    const checkFavorite = async () => {
+      try {
+        const response = await client.get(
+          `/listings/${item?._id}/favourites/check`
+        );
+        setFavorite(response.data?.success);
+        // console.log(response.data, "running");
+      } catch (error) {
+        console.log(error?.response?.data, "error");
+        setFavorite(false);
+      }
+    };
+    checkFavorite();
+  }, [item?._id]);
+
+  const handleHeart = async () => {
+    console.log(favorite, "favorite");
+    try {
+      if (favorite) {
+        const response = await client.delete(
+          `/listings/${item?._id}/favourites`
+        );
+        if (response.data?.success) {
+          setFavorite(false);
+        }
+
+        response.data && dispatch(fetchFavourites());
+        console.log(response.data, "delete");
+      } else {
+        console.log("adding favorite");
+        const response = await client.post(
+          `/listings/${item?._id}/favourites/add`
+        );
+        setFavorite(response.data?.success);
+        console.log(response.data);
+        response.data && dispatch(fetchFavourites());
+      }
+    } catch (error) {
+      console.log(error?.response?.data);
+    }
+  };
+
   return (
     <>
       {item ? (
@@ -407,7 +541,11 @@ const ItemDisplayScreen = ({ route }) => {
             showsVerticalScrollIndicator={false}
             // horizontal
           >
-            <ScreenHeaderComponent title={item.name} hideModeToggle={false} />
+            <ScreenHeaderComponent
+              backAction={() => navigation.navigate("Home")}
+              title={item.name}
+              hideModeToggle={false}
+            />
             <Card
               containerStyle={{
                 width: "100%",
@@ -422,18 +560,9 @@ const ItemDisplayScreen = ({ route }) => {
                 borderRadius: 10,
                 //   width: 105,
                 elevation: 1,
+                // position: "relative",
               }}
             >
-              {/* <Card.Image
-            source={{ uri: item.imageSrc }}
-            style={{
-              width: "100%",
-              height: 250,
-              alignSelf: "center",
-              marginTop: 0,
-              resizeMode: "cover",
-            }}
-          /> */}
               <Avatar
                 title={`${item?.name} image`}
                 source={{ uri: setImageQuality(item?.images[0]?.url, 35) }}
@@ -446,6 +575,7 @@ const ItemDisplayScreen = ({ route }) => {
                 imageProps={{ borderRadius: 8 }}
               />
             </Card>
+
             <Card
               containerStyle={{
                 width: "100%",
@@ -469,7 +599,45 @@ const ItemDisplayScreen = ({ route }) => {
                     {item?.location}
                   </Text>
                 </View>
-                <NormalDataTextComponent title="Name" text={item.name} />
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "baseline",
+                  }}
+                >
+                  <Text
+                    style={{
+                      //   color: style.theme.colors.black,
+                      // marginBottom: 3,
+                      fontFamily: `${defaultFont}_600SemiBold`,
+                      fontWeight: "600",
+                      fontSize: 16,
+                      marginRight: 20,
+                    }}
+                    selectable
+                    selectionColor={style.theme.colors.error}
+                  >
+                    Name: {item?.name}
+                  </Text>
+                  {/* <NormalDataTextComponent title="Name" text={item.name} /> */}
+
+                  <ThemedButton
+                    icon={
+                      <Icon
+                        name={favorite ? "heart" : "heart-outline"}
+                        type="ionicon"
+                        size={20}
+                        color={style.theme.colors.error}
+                      />
+                    }
+                    type="clear"
+                    radius={30}
+                    onPress={() => {
+                      handleHeart();
+                    }}
+                  />
+                </View>
                 <View
                   style={{
                     flexDirection: "row",
@@ -506,6 +674,68 @@ const ItemDisplayScreen = ({ route }) => {
                 />
               </View>
             </Card>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("ReportListing", { item })}
+            >
+              <Card
+                containerStyle={{
+                  // width: "100%",
+                  margin: 0,
+                  marginBottom: 10,
+                  // padding: 10,
+                  padding: 0,
+                  backgroundColor: "rgba(241,15,15, 0.5)",
+                  borderWidth: 0,
+                  borderRadius: 10,
+                  //   width: 105,
+                  elevation: 1,
+                }}
+                wrapperStyle={{
+                  flexDirection: "row",
+                  alignItems: "flex-start",
+                  padding: 10,
+                  justifyContent: "space-between",
+                  width: "100%",
+                  gap: 10,
+                }}
+              >
+                <Icon
+                  name="warning-outline"
+                  type="ionicon"
+                  size={30}
+                  style={{
+                    backgroundColor: "rgb(241,15,15)",
+                    padding: 10,
+                    borderRadius: 5,
+                  }}
+                  color={"#fff"}
+                  containerStyle={{ alignSelf: "center" }}
+                />
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={{
+                      fontFamily: `${defaultFont}_600SemiBold`,
+
+                      color: "#fff",
+                    }}
+                  >
+                    Report
+                  </Text>
+                  <Text
+                    style={{
+                      fontFamily: `${defaultFont}_400Regular`,
+                      color: "#fff",
+                      fontSize: 12,
+                    }}
+                  >
+                    Report this listing if you find it is inappropriate or
+                    offensive
+                  </Text>
+                </View>
+                <Icon name="arrow-right" type="octicon" color={"#fff"} />
+              </Card>
+            </TouchableOpacity>
+
             <StyledCard>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Avatar

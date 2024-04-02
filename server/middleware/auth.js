@@ -1,10 +1,13 @@
 import jwt from "jsonwebtoken";
 import { userModel } from "../models/user.js";
-import fs from "fs";
 
 export const isAuthenticated = async (req, res, next) => {
   try {
-    const { token } = req.cookies;
+    let { token } = req.cookies;
+
+    if (!token) {
+      token = req.headers.authorization.split(" ")[1];
+    }
 
     if (!token) {
       return res
@@ -20,3 +23,18 @@ export const isAuthenticated = async (req, res, next) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const isAdmin = async (req, res, next) => {
+  try {
+    if (!req?.user?.isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to access this route",
+      });
+    }
+    next();
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+``;

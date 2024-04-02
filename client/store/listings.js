@@ -69,12 +69,112 @@ export const userListings = createAsyncThunk(
   }
 );
 
+export const fetchBids = createAsyncThunk(
+  "listings/bids/fetch",
+  async (listingId) => {
+    try {
+      const response = await client.get(`/listings/${listingId}/bids`);
+      return response.data.documents;
+    } catch (error) {
+      console.error("fetching bids error", error);
+      throw error;
+    }
+  }
+);
+
+export const deleteBid = createAsyncThunk(
+  "listings/bids/delete",
+  async (bidId) => {
+    try {
+      const response = await client.delete(`/bids/${bidId}`);
+      return response.data.documents;
+    } catch (error) {
+      console.error("deleting bid error", error);
+      throw error;
+    }
+  }
+);
+
+export const addBid = createAsyncThunk("listings/bids/add", async (params) => {
+  try {
+    const response = await client.post(
+      `/listings/${params.listingId}/bids/add`,
+      {
+        forId: params.forId,
+      }
+    );
+    return response.data.documents;
+  } catch (error) {
+    console.error("adding bid error", error);
+    throw error;
+  }
+});
+
+export const addToFavourites = createAsyncThunk(
+  "listings/favourites/add",
+  async (params) => {
+    try {
+      const response = await client.post(
+        `/listings/${params.listingId}/favourites/add`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("adding to favourites error", error);
+      throw error;
+    }
+  }
+);
+
+export const removeFromFavourites = createAsyncThunk(
+  "listings/favourites/remove",
+  async (params) => {
+    try {
+      const response = await client.delete(
+        `/listings/favourites/${params.favouriteId}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("removing from favourites error", error);
+      throw error;
+    }
+  }
+);
+
+export const fetchFavourites = createAsyncThunk(
+  "listings/favourites/fetch",
+  async () => {
+    try {
+      const response = await client.get("/listings/favourites/my");
+      return response.data.documents;
+    } catch (error) {
+      console.error("fetching favourites error", error);
+      throw error;
+    }
+  }
+);
+
+export const fetchLocations = createAsyncThunk(
+  "listings/locations/fetch",
+  async () => {
+    try {
+      const response = await client.get("/locations");
+      return response.data.documents;
+    } catch (error) {
+      console.error("fetching locations error", error);
+      throw error;
+    }
+  }
+);
+
 // Initial state for the listings slice
 const initialState = {
   listings: [],
   comments: {},
   userListings: [],
   categories: [],
+  bids: [],
+  locations: [],
+  favourites: [],
 };
 
 // Redux Toolkit slice for managing listings state
@@ -116,6 +216,36 @@ const listings = createSlice({
       })
       .addCase(userListings.rejected, (state) => {
         console.log("fetching user listings rejected");
+      })
+      .addCase(fetchBids.pending, (state) => {
+        console.log("fetching bids");
+      })
+      .addCase(fetchBids.fulfilled, (state, { payload }) => {
+        console.log("fetching bids fulfilled");
+        state.bids = payload;
+      })
+      .addCase(fetchBids.rejected, (state) => {
+        console.log("fetching bids rejected");
+      })
+      .addCase(fetchLocations.pending, (state) => {
+        console.log("fetching locations");
+      })
+      .addCase(fetchLocations.fulfilled, (state, { payload }) => {
+        console.log("fetching locations fulfilled");
+        state.locations = payload;
+      })
+      .addCase(fetchLocations.rejected, (state) => {
+        console.log("fetching locations rejected");
+      })
+      .addCase(fetchFavourites.pending, (state) => {
+        console.log("fetching favourites");
+      })
+      .addCase(fetchFavourites.fulfilled, (state, { payload }) => {
+        console.log("fetching favourites fulfilled");
+        state.favourites = payload;
+      })
+      .addCase(fetchFavourites.rejected, (state) => {
+        console.log("fetching favourites rejected");
       });
   },
 });
@@ -127,3 +257,6 @@ export default listings.reducer;
 export const getAllListings = (state) => state.listings.listings;
 export const getAllCategories = (state) => state.listings.categories;
 export const getUserListings = (state) => state.listings.userListings;
+export const getBids = (state) => state.listings.bids;
+export const getLocations = (state) => state.listings.locations;
+export const getFavourites = (state) => state.listings.favourites;

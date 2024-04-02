@@ -13,6 +13,8 @@ const AuthProvider = ({ children }) => {
   const [authCheck, setAuthCheck] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState({});
+  const [loadLogin, setLoadLogin] = useState(false);
+  const [loginMessage, setLoginMessage] = useState(null);
 
   useEffect(() => {
     const getUser = async () => {
@@ -35,6 +37,7 @@ const AuthProvider = ({ children }) => {
 
   const login = async (email = "", password = "") => {
     try {
+      setLoadLogin(true);
       const response = await client.post(
         "/login",
         {
@@ -47,14 +50,18 @@ const AuthProvider = ({ children }) => {
           },
         }
       );
-      if (response.data.user) {
+      if (response.data) {
         setIsSignedIn(true);
+        setLoadLogin(false);
         setUser(response.data.user);
+        // setLoginMessage("Login Successful");
       }
     } catch (error) {
       console.log(error.response.data);
       setIsSignedIn(false);
+      setLoadLogin(false);
       setUser({});
+      setLoginMessage(error?.response?.data?.message);
     }
   };
 
@@ -103,6 +110,9 @@ const AuthProvider = ({ children }) => {
           setRefreshing,
           error,
           setError,
+          loadLogin,
+          loginMessage,
+          setLoginMessage,
         }}
       >
         {children}

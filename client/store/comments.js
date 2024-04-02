@@ -4,7 +4,7 @@ import { client } from "../configs/axios";
 // Redux Thunk to fetch all categories
 export const fetchAllComments = createAsyncThunk(
   "listings/comments/fetch",
-  async ({ listingId }) => {
+  async ({ listingId }, { dispatch }) => {
     try {
       // Fetch comments from the server
       const response = await client.get("/listings/" + listingId + "/comments");
@@ -12,6 +12,25 @@ export const fetchAllComments = createAsyncThunk(
     } catch (error) {
       // Log and rethrow the error to propagate it
       console.error("comments fetch error", error.response.data);
+      throw error;
+    }
+  }
+);
+
+export const addComment = createAsyncThunk(
+  "listings/comments/add",
+  async (params, { dispatch }) => {
+    try {
+      // Fetch comments from the server
+      const response = await client.post("/listings/comments/add", {
+        listingId: params.listingId,
+        type: params.type,
+        text: params.comment,
+      });
+      dispatch(fetchAllComments({ listingId: params.listingId }));
+    } catch (error) {
+      // Log and rethrow the error to propagate it
+      console.error("comments add error", error.response.data);
       throw error;
     }
   }
@@ -37,7 +56,7 @@ const comments = createSlice({
         console.log("fetching all comments fulfilled");
         state.comments = payload;
       })
-      .addCase(fetchAllComments.rejected, (state) => {
+      .addCase(fetchAllComments.rejected, (state, { payload }) => {
         console.log("fetching all comments rejected");
       });
   },

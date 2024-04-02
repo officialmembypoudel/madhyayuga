@@ -5,6 +5,7 @@ export const sendToken = (res, user, statusCode, message) => {
     expires: new Date(
       Date.now() + process.env.JWT_EXPIRE * 24 * 60 * 60 * 1000
     ),
+    domain: "localhost",
   };
 
   const userData = {
@@ -20,5 +21,5 @@ export const sendToken = (res, user, statusCode, message) => {
   res
     .status(statusCode)
     .cookie("token", token, options)
-    .json({ success: true, message, user: userData });
+    .json({ success: true, message, user: userData, token: token });
 };

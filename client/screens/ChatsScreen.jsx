@@ -24,8 +24,6 @@ const ChatsScreen = () => {
     getChatRooms();
   }, []);
 
-  console.log("here are the chat rooms", chatRooms.length);
-
   return (
     <View
       style={{

@@ -13,8 +13,8 @@ export const register = async (req, res) => {
 
     if (user) {
       return res
-        .status(400)
-        .json({ success: false, message: "user already exsists" });
+        .status(409)
+        .json({ success: false, message: "Email is already in use!" });
     }
 
     const otp = Math.floor(Math.random() * 1000000);
@@ -158,6 +158,21 @@ export const getUserByID = async (req, res) => {
       message: "Got user successfully!",
       user: userData,
     });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getUsers = async (req, res) => {
+  try {
+    const users = await userModel.find();
+
+    if (!users)
+      return res
+        .status(400)
+        .json({ success: false, message: "No users found!" });
+
+    res.status(200).json({ success: true, documents: users });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

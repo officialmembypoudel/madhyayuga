@@ -52,6 +52,11 @@ const listingsSchema = new mongoose.Schema({
     ref: "category",
     required: true,
   },
+  locationId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "location",
+    required: true,
+  },
 });
 
 export const listingsModel = mongoose.model("listings", listingsSchema);

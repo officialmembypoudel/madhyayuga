@@ -9,6 +9,9 @@ import NewListings from "../screens/NewListings";
 import MyListings from "../screens/MyListings";
 import EditListingScreen from "../screens/EditListingScreen";
 import MessagesScreen from "../screens/MessagesScreen";
+import ReportListingScreen from "../screens/ReportListingScreen";
+import AccountDetailsScreen from "../screens/AccountDetailsScreen";
+import Favourites from "../screens/Favourites";
 
 const Tab = createBottomTabNavigator();
 
@@ -185,17 +188,27 @@ export default function BottomTabs() {
         name="EditListing"
         component={EditListingScreen}
         options={{
-          // tabBarIcon: ({ focused }) => {
-          //   return (
-          //     <Icon
-          //       type="ionicon"
-          //       name={focused ? "person-circle" : "person-circle-outline"}
-          //       size={0}
-          //       color={style.theme.colors.black}
-          //     />
-          //   );
-          // },
-          //   tabBarIconStyle: { display: "none" },
+          tabBarButton: () => null,
+        }}
+      />
+      <Tab.Screen
+        name="ReportListing"
+        component={ReportListingScreen}
+        options={{
+          tabBarButton: () => null,
+        }}
+      />
+      <Tab.Screen
+        name="AccountDetails"
+        component={AccountDetailsScreen}
+        options={{
+          tabBarButton: () => null,
+        }}
+      />
+      <Tab.Screen
+        name="Favourites"
+        component={Favourites}
+        options={{
           tabBarButton: () => null,
         }}
       />
