@@ -1,5 +1,7 @@
 "use client";
 
+import DeleteModal from "@/components/Modals/DeleteModal";
+import EditUserModal from "@/components/Modals/EditUserModal";
 import { useStore } from "@/context/Store";
 import { DeleteForever, Edit } from "@mui/icons-material";
 import {
@@ -27,12 +29,14 @@ const columns = [
     width: 100,
     editable: true,
     flex: 0.2,
-    renderCell: (params) => (
-      <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-        <Avatar src={params?.row?.avatar?.url} />
-        <Typography variant="body2">{params.row?.name}</Typography>
-      </Box>
-    ),
+    renderCell: (params) => {
+      return (
+        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+          <Avatar src={params?.row?.avatar?.url} />
+          <Typography variant="body2">{params.row?.name}</Typography>
+        </Box>
+      );
+    },
   },
   {
     field: "phone",
@@ -67,16 +71,27 @@ const columns = [
     field: "actions",
     headerName: "Actions",
     width: 100,
-    renderCell: (params) => (
-      <strong>
-        <IconButton color="success">
-          <Edit />
-        </IconButton>
-        <IconButton color="error">
-          <DeleteForever />
-        </IconButton>
-      </strong>
-    ),
+    renderCell: (params) => {
+      const [open, setOpen] = React.useState(false);
+      const [deleteOpen, setDeleteOpen] = React.useState(false);
+      return (
+        <strong>
+          <IconButton onClick={() => setOpen(true)} color="success">
+            <Edit />
+          </IconButton>
+          <IconButton onClick={() => setDeleteOpen(true)} color="error">
+            <DeleteForever />
+          </IconButton>
+
+          <EditUserModal open={open} setOpen={setOpen} user={params?.row} />
+          <DeleteModal
+            open={deleteOpen}
+            setOpen={setDeleteOpen}
+            value={params?.row}
+          />
+        </strong>
+      );
+    },
     flex: 0.05,
   },
 ];

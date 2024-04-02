@@ -1,6 +1,9 @@
 "use client";
 
 import AddListingDrawer from "@/components/AddListingDrawer";
+import DeleteModal from "@/components/Modals/DeleteModal";
+import EditListingModal from "@/components/Modals/EditListingModal";
+import EditUserModal from "@/components/Modals/EditUserModal";
 import { useStore } from "@/context/Store";
 import { setImageQuality } from "@/utils/utils";
 import { DeleteForever, Edit } from "@mui/icons-material";
@@ -98,16 +101,32 @@ const columns = [
     field: "actions",
     headerName: "Actions",
     width: 100,
-    renderCell: (params) => (
-      <strong>
-        <IconButton color="success">
-          <Edit />
-        </IconButton>
-        <IconButton color="error">
-          <DeleteForever />
-        </IconButton>
-      </strong>
-    ),
+    renderCell: (params) => {
+      const [open, setOpen] = useState(false);
+      const [deleteOpen, setDeleteOpen] = React.useState(false);
+
+      return (
+        <strong>
+          <IconButton onClick={() => setOpen(true)} color="success">
+            <Edit />
+          </IconButton>
+          <IconButton onClick={() => setDeleteOpen(true)} color="error">
+            <DeleteForever />
+          </IconButton>
+
+          <EditListingModal
+            open={open}
+            setOpen={setOpen}
+            listing={params?.row}
+          />
+          <DeleteModal
+            open={deleteOpen}
+            setOpen={setDeleteOpen}
+            value={params?.row}
+          />
+        </strong>
+      );
+    },
     flex: 0.1,
   },
 ];
