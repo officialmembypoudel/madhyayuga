@@ -1,5 +1,6 @@
 import { MenuItem } from "@mui/base";
 import { Cancel, Edit, Save } from "@mui/icons-material";
+import { LoadingButton } from "@mui/lab";
 import {
   Box,
   Button,
@@ -91,7 +92,7 @@ const EditUserModal = ({ open, setOpen, user }) => {
           >
             Cancel
           </Button>
-          <Button
+          <LoadingButton
             sx={{ flex: 1 }}
             variant="contained"
             color="success"
@@ -101,7 +102,7 @@ const EditUserModal = ({ open, setOpen, user }) => {
             }
           >
             Save
-          </Button>
+          </LoadingButton>
         </Box>
       </Card>
     </Modal>

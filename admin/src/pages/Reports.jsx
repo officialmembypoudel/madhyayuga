@@ -19,10 +19,13 @@ import {
   Typography,
 } from "@mui/material";
 import { useStore } from "@/context/Store";
-import { capitalizeFirstLetter } from "@/utils/utils";
+import { capitalizeFirstLetter, setImageQuality } from "@/utils/utils";
+import ReportViewModal from "@/components/Modals/ReportViewModal";
 
 const Reports = () => {
   const { fetchReports, reports } = useStore();
+  const [open, setOpen] = React.useState(false);
+  const [selectedReport, setSelectedReport] = React.useState(null);
 
   useEffect(() => {
     fetchReports();
@@ -64,7 +67,7 @@ const Reports = () => {
       </Card>
       <Grid container spacing={2} sx={{ mt: 2 }}>
         {reports?.documents?.map((report) => (
-          <Grid item xs={12} sm={6} md={4} lg={3}>
+          <Grid item xs={12} sm={6} md={4} lg={4} xl={3}>
             <Card>
               <Box
                 sx={{
@@ -82,7 +85,7 @@ const Reports = () => {
                   <Avatar
                     variant="rounded"
                     sx={{ width: 130, height: 130 }}
-                    src={report?.image?.url}
+                    src={setImageQuality(report?.image?.url, 20)}
                   />
                   <Box sx={{ mr: "auto" }}>
                     <Typography variant="h6">
@@ -97,7 +100,14 @@ const Reports = () => {
                     <Chip label={report?.status} size="small" color="info" />
                     {/* <Typography variant="body2">{report?.status}</Typography> */}
 
-                    <IconButton color="info">
+                    <IconButton
+                      onClick={() => {
+                        setSelectedReport(report);
+
+                        setOpen(true);
+                      }}
+                      color="info"
+                    >
                       <RemoveRedEye />
                     </IconButton>
                   </Box>
@@ -110,6 +120,7 @@ const Reports = () => {
           </Grid>
         ))}
       </Grid>
+      <ReportViewModal open={open} setOpen={setOpen} value={selectedReport} />
     </Box>
   );
 };

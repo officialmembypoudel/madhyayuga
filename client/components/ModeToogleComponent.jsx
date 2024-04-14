@@ -39,6 +39,7 @@ const ModeToogleComponent = () => {
         setIsDark(value.mode === "dark" ? true : false);
         setToastMessage({
           visible: false,
+          
         });
       } catch (e) {
         // console.log(e);

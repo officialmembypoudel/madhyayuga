@@ -51,4 +51,6 @@ const reportSchema = new mongoose.Schema({
   },
 });
 
+reportSchema.index({ "$**": "text" }, { name: "text_index" });
+
 export const reportModel = mongoose.model("report", reportSchema);

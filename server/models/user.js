@@ -43,13 +43,40 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  credit: {
+    type: Number,
+    default: 0,
+  },
+  suspended: {
+    type: Boolean,
+    default: false,
+  },
+  searchText: {
+    type: String,
+  },
+  rating: {
+    type: Number,
+    default: 0,
+  },
+  totalRating: {
+    type: Number,
+    default: 0,
+  },
 });
 
 userSchema.pre("save", async function (next) {
+  this.searchText = this.name + " " + this.email + " " + this.phone;
   if (!this.isModified("password")) return next();
   const salt = await bcrypt.genSalt(15);
   this.password = await bcrypt.hash(this.password, salt);
 });
+
+userSchema.index(
+  {
+    "$**": "text",
+  },
+  { name: "text_index" }
+);
 
 userSchema.methods.getJWTToken = function () {
   return jwt.sign({ _id: this._id }, process.env.JWT_SECRET, {

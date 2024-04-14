@@ -1,9 +1,6 @@
 {
-  "/users/page": "app/users/page.js",
-  "/category/page": "app/category/page.js",
   "/page": "app/page.js",
+  "/users/page": "app/users/page.js",
   "/listings/page": "app/listings/page.js",
-  "/auth/page": "app/auth/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js",
   "/reports/page": "app/reports/page.js"
 }

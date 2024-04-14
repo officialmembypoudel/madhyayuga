@@ -5,6 +5,7 @@ import {
   deleteListing,
   getListings,
   getMyListings,
+  rejectUnrejectListing,
   updateListing,
   updateListingViews,
 } from "../controllers/listings.js";
@@ -14,6 +15,7 @@ import { addBid, deleteBid, getBids } from "../controllers/bid.js";
 import {
   addReport,
   deleteReport,
+  getReportMessages,
   getReports,
   updateReport,
 } from "../controllers/report.js";
@@ -71,7 +73,15 @@ router.route("/listings/reports/").get(isAuthenticated, isAdmin, getReports);
 
 router
   .route("/listings/reports/update/:id")
-  .put(isAuthenticated, updateReport)
-  .delete(isAuthenticated, deleteReport);
+  .put(isAuthenticated, isAdmin, updateReport)
+  .delete(isAuthenticated, isAdmin, deleteReport);
+
+router
+  .route("/listings/reports/:id/messages")
+  .get(isAuthenticated, isAdmin, getReportMessages);
+
+router
+  .route("/listings/:listingId/reject")
+  .post(isAuthenticated, isAdmin, rejectUnrejectListing);
 
 export default router;

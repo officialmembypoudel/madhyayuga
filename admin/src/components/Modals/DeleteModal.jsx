@@ -1,8 +1,9 @@
 import { Cancel, DeleteForever } from "@mui/icons-material";
-import { Box, Button, Card, Modal, Typography } from "@mui/material";
+import { Box, Button, Card, Modal, Typography, TextField } from "@mui/material";
 import React from "react";
 
 const DeleteModal = ({ open, setOpen, value, handleDelete }) => {
+  const [message, setMessage] = React.useState("");
   return (
     <Modal
       open={open}
@@ -37,6 +38,20 @@ const DeleteModal = ({ open, setOpen, value, handleDelete }) => {
           cannot undo this action!
         </Typography>
 
+        <Typography color="error" variant="body1" sx={{ mt: 2, mb: 1 }}>
+          Please provide a reason for deleting this{" "}
+          <strong>{value?.name}</strong>.
+        </Typography>
+
+        <TextField
+          fullWidth
+          multiline
+          rows={4}
+          placeholder={`Reason why ${value?.name} is deleted.`}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+        />
+
         <Box
           sx={{
             display: "flex",
@@ -59,6 +74,11 @@ const DeleteModal = ({ open, setOpen, value, handleDelete }) => {
             startIcon={<DeleteForever />}
             color="error"
             sx={{ flex: 1 }}
+            disabled={!message}
+            onClick={() => {
+              handleDelete(value?._id, message);
+              setOpen(false);
+            }}
           >
             Delete
           </Button>

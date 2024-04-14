@@ -67,7 +67,7 @@ export const getReports = async (req, res) => {
     const { type } = req.params;
     if (!type) {
       const allReports = await reportModel
-        .find()
+        .find({})
         .populate({
           path: "listing",
           select: "name createdAt images with",
@@ -76,13 +76,17 @@ export const getReports = async (req, res) => {
         .populate({
           path: "reportedUser",
           select: "name email avatar phone",
-        });
+        })
+        .populate("reporter");
 
       return res.status(200).json({ success: true, documents: allReports });
     }
 
     const reports = await reportModel
-      .find({ type })
+      .find({
+        type,
+        $text: { $search: req?.query?.search || "", $caseSensitive: false },
+      })
       .populate({
         path: "listing",
         select: "name createdAt images with",
@@ -91,7 +95,8 @@ export const getReports = async (req, res) => {
       .populate({
         path: "reportedUser",
         select: "name email avatar phone",
-      });
+      })
+      .populate("reporter");
     res.status(200).json({ success: true, documents: reports });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -151,6 +156,7 @@ export const updateReport = async (req, res) => {
       report: id,
       message: req.body.message,
       contactEmail: report.contactEmail,
+      status: req.body.status,
     });
 
     reportMessage.save();
@@ -171,6 +177,21 @@ export const deleteReport = async (req, res) => {
 
     const report = await reportModel.findByIdAndDelete(id);
     res.status(200).json({ success: true, report });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getReportMessages = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id)
+      return res
+        .status(400)
+        .json({ success: false, message: "ID is required" });
+
+    const reportMessages = await reportMessagesModel.find({ report: id });
+    res.status(200).json({ success: true, documents: reportMessages });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

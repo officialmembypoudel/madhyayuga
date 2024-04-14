@@ -1,5 +1,6 @@
 import multer from "multer";
 import { listingsModel } from "../models/listings.js";
+import { sendMail } from "../utils/sendMail.js";
 
 export const addListing = async (req, res) => {
   try {
@@ -136,10 +137,14 @@ export const updateListingViews = async (req, res) => {
 };
 
 export const deleteListing = async (req, res) => {
-  // TODO Add image delete logic
+  console.log("delete listing");
   try {
     const { listingId } = req.params;
-    let listing = await listingsModel.findById(listingId);
+    const { message } = req.body;
+
+    let listing = await listingsModel
+      .findById(listingId)
+      .populate("userId", "email");
 
     if (!listing) {
       return res.status(400).json({
@@ -147,7 +152,25 @@ export const deleteListing = async (req, res) => {
         message: "Listing doesn't exist!",
       });
     }
-
+    if (req?.user?.isAdmin) {
+      if (!message) {
+        return res.status(400).json({
+          success: false,
+          message: "Please provide a reason for deleting this listing!",
+        });
+      }
+      console.log("it hit here, delete listing");
+      await listingsModel.findByIdAndDelete(listingId);
+      sendMail(
+        listing?.userId?.email,
+        "Listing Deleted",
+        `Your listing ${listing.name} has been deleted for the following reason: ${message}`
+      );
+      return res.status(200).json({
+        success: true,
+        message: "Deleted listing successfully",
+      });
+    }
     if (listing.userId.toString() !== req.user._id.toString()) {
       return res.status(400).json({
         success: false,
@@ -156,11 +179,84 @@ export const deleteListing = async (req, res) => {
     }
 
     await listingsModel.findByIdAndDelete(listingId);
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Deleted listing successfully",
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const searchListings = async (req, res) => {
+  try {
+    const { query } = req.query;
+
+    const listings = await listingsModel
+      .find({
+        $text: { $search: query },
+      })
+      .populate("userId", "name email avatar phone")
+      .populate("categoryId");
+
+    res.status(200).json({
+      success: true,
+      message: "Fetched Listings successfully!",
+      documents: listings,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const rejectUnrejectListing = async (req, res) => {
+  try {
+    const { listingId } = req.params;
+    const { message } = req.body;
+
+    let listing = await listingsModel
+      .findById(listingId)
+      .populate("userId", "email");
+    console.log(listing);
+
+    if (!listing) {
+      return res.status(400).json({
+        success: false,
+        message: "Listing doesn't exist!",
+      });
+    }
+
+    if (listing.rejected) {
+      await listingsModel.findByIdAndUpdate(listingId, { rejected: false });
+
+      sendMail(
+        listing?.userId?.email,
+        "Listing Approved",
+        `Your listing ${listing.name} has been approved!`
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: `Your Listing of name ${listing.name} has been approved!`,
+        document: listing,
+      });
+    }
+
+    await listingsModel.findByIdAndUpdate(listingId, { rejected: true });
+
+    sendMail(
+      listing?.userId?.email,
+      "Listing Rejected",
+      `Your listing ${listing.name} has been rejected for the following reason: ${message}`
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Rejected listing successfully",
+      document: listing,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+    console.log(error.message);
   }
 };

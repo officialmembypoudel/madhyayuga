@@ -1,3 +1,4 @@
+import e from "express";
 import { createTransport } from "nodemailer";
 
 export const sendMail = async (email, subject, message) => {
@@ -17,7 +18,6 @@ export const sendMail = async (email, subject, message) => {
       subject,
       text: message,
     });
-    console.log(mail, "new message");
   } catch (error) {
     console.log(error);
   }

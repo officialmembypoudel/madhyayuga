@@ -1,4 +1,6 @@
+import { useStore } from "@/context/Store";
 import { Cancel, Edit, Save } from "@mui/icons-material";
+import { LoadingButton } from "@mui/lab";
 import {
   Box,
   Button,
@@ -12,10 +14,15 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { use, useEffect, useState } from "react";
 
 const EditListingModal = ({ open, setOpen, listing }) => {
   const [editedlisting, setEditedlisting] = useState(listing);
+  const { categories, updateListings, updateLoading } = useStore();
+
+  useEffect(() => {
+    setEditedlisting(listing);
+  }, [listing]);
 
   const handleClose = () => {
     setEditedlisting(listing);
@@ -95,10 +102,9 @@ const EditListingModal = ({ open, setOpen, listing }) => {
               setEditedlisting({ ...editedlisting, categoryId: e.target.value })
             }
           >
-            <MenuItem value={10}>Ten</MenuItem>
-            <MenuItem value={editedlisting?.categoryId}>
-              {editedlisting?.categoryId}
-            </MenuItem>
+            {categories?.documents?.map((category) => (
+              <MenuItem value={category?._id}>{category?.name}</MenuItem>
+            ))}
           </Select>
         </FormControl>
 
@@ -132,7 +138,8 @@ const EditListingModal = ({ open, setOpen, listing }) => {
           >
             Cancel
           </Button>
-          <Button
+          <LoadingButton
+            loading={updateLoading}
             sx={{ flex: 1 }}
             variant="contained"
             color="success"
@@ -145,9 +152,13 @@ const EditListingModal = ({ open, setOpen, listing }) => {
               !editedlisting?.with ||
               !editedlisting?.categoryId
             }
+            onClick={() => {
+              updateListings(editedlisting?._id, editedlisting);
+              !updateLoading && handleClose();
+            }}
           >
             Save
-          </Button>
+          </LoadingButton>
         </Box>
       </Card>
     </Modal>
