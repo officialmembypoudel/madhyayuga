@@ -1,5 +1,6 @@
 "use client";
 
+import { LocationOn } from "@mui/icons-material";
 import Category from "@mui/icons-material/Category";
 import CircleNotifications from "@mui/icons-material/CircleNotifications";
 import Dashboard from "@mui/icons-material/Dashboard";
@@ -22,6 +23,11 @@ const routes = [
     path: "/category",
     icon: Category,
     name: "Category",
+  },
+  {
+    path: "/locations",
+    icon: LocationOn,
+    name: "Locations",
   },
   {
     path: "/users",

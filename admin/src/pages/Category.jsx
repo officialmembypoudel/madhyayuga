@@ -1,5 +1,7 @@
 "use client";
+import DeleteModal from "@/components/Modals/DeleteModal";
 import { useStore } from "@/context/Store";
+import { replaceHyphens } from "@/utils/utils";
 import {
   AppsOutlined,
   Cancel,
@@ -44,7 +46,9 @@ const columns = [
     renderCell: (params) => (
       <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
         <Avatar variant="square" sx={{ bgcolor: "#fff", borderRadius: 1 }}>
-          <Icon style={{ color: params.row?.color }}>{params.row?.icon}</Icon>
+          <Icon style={{ color: params.row?.color }}>
+            {replaceHyphens(params?.row?.icon)}
+          </Icon>
         </Avatar>
         <Typography variant="body2">{params.row?.name}</Typography>
       </Box>
@@ -69,15 +73,18 @@ const columns = [
     headerName: "Actions",
     flex: 0.1,
     renderCell: (params) => {
-      const { selectCategory } = useStore();
+      const { selectCategory, deleteCategories } = useStore();
       return (
         <Box sx={{ display: "flex", gap: 2 }}>
           <IconButton color="info" onClick={() => selectCategory(params?.row)}>
             <RemoveRedEye />
           </IconButton>
-          <IconButton color="error">
+          {/* <IconButton
+            onClick={() => deleteCategories(params?.row?._id)}
+            color="error"
+          >
             <DeleteForever />
-          </IconButton>
+          </IconButton> */}
         </Box>
       );
     },
@@ -85,10 +92,29 @@ const columns = [
 ];
 
 const Category = () => {
-  const { categories, fetchCategories, selectedCategory, selectCategory } =
-    useStore();
+  const {
+    categories,
+    fetchCategories,
+    selectedCategory,
+    selectCategory,
+    addcategory,
+    getCategoryListingCount,
+    deleteCategories,
+    updateCategories,
+    setSelectedCategory,
+  } = useStore();
   const [query, setQuery] = useState("");
   const [allCategories, setAllCategories] = useState({ documents: [] });
+  const [category, setCategory] = useState({
+    name: "",
+    icon: "",
+    iconFamily: "material",
+    color: "",
+  });
+  const [count, setCount] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedCategory, setEditedCategory] = useState({});
 
   useEffect(() => {
     fetchCategories();
@@ -97,7 +123,26 @@ const Category = () => {
   useEffect(() => {
     setAllCategories({ ...categories });
   }, [categories]);
-  console.warn(selectedCategory);
+
+  useEffect(() => {
+    if (!isEditing) return;
+    setEditedCategory({ ...selectedCategory, iconFamily: "material" });
+  }, [isEditing, selectedCategory]);
+
+  useEffect(() => {
+    const getCount = async () => {
+      try {
+        const ccount = await getCategoryListingCount(selectedCategory?._id);
+        setCount(ccount);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    if (selectedCategory) {
+      getCount();
+    }
+  }, [selectedCategory]);
+
   useEffect(() => {
     if (query) {
       const filteredCategories = allCategories?.documents?.filter((category) =>
@@ -161,9 +206,110 @@ const Category = () => {
             />
           </Card>
         </Grid>
-        {!selectedCategory ? (
+        {isEditing ? (
           <Grid item sm={12} md={5}>
-            <form>
+            <form onSubmit={(e) => e.preventDefault()}>
+              <Card
+                sx={{
+                  height: 400,
+                  width: "100%",
+                  p: 2,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Typography variant="h6">
+                  Edit {selectedCategory?.name}
+                </Typography>
+                <Box sx={{ mt: 4, mb: "auto" }}>
+                  <TextField
+                    label="Name"
+                    fullWidth
+                    InputProps={{ endAdornment: <CategoryOutlined /> }}
+                    placeholder="Category Name"
+                    sx={{ mb: 2 }}
+                    value={editedCategory.name}
+                    onChange={(e) =>
+                      setEditedCategory({
+                        ...editedCategory,
+                        name: e.target.value,
+                      })
+                    }
+                  />
+                  <TextField
+                    label="Icon Name"
+                    fullWidth
+                    InputProps={{ endAdornment: <AppsOutlined /> }}
+                    placeholder="Icon Name in snake-case"
+                    sx={{ mb: 2 }}
+                    value={editedCategory.icon}
+                    onChange={(e) =>
+                      setEditedCategory({
+                        ...editedCategory,
+                        icon: e.target.value,
+                      })
+                    }
+                  />
+                  <TextField
+                    label="Color"
+                    fullWidth
+                    InputProps={{ endAdornment: <PaletteOutlined /> }}
+                    placeholder="Icon Color HEX or RGB"
+                    sx={{ mb: 2 }}
+                    value={editedCategory.color}
+                    onChange={(e) =>
+                      setEditedCategory({
+                        ...editedCategory,
+                        color: e.target.value,
+                      })
+                    }
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 10,
+                  }}
+                >
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    startIcon={<Cancel />}
+                    fullWidth
+                    onClick={() => {
+                      setEditedCategory(selectedCategory);
+                      setIsEditing(false);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="success"
+                    startIcon={<Save />}
+                    fullWidth
+                    type="submit"
+                    onClick={async () => {
+                      const category = await updateCategories(
+                        editedCategory,
+                        () => {
+                          setIsEditing(false);
+                        }
+                      );
+                      setSelectedCategory(category);
+                    }}
+                  >
+                    Save
+                  </Button>
+                </Box>
+              </Card>
+            </form>
+          </Grid>
+        ) : !selectedCategory ? (
+          <Grid item sm={12} md={5}>
+            <form onSubmit={(e) => e.preventDefault()}>
               <Card
                 sx={{
                   height: 400,
@@ -182,6 +328,10 @@ const Category = () => {
                     InputProps={{ endAdornment: <CategoryOutlined /> }}
                     placeholder="Category Name"
                     sx={{ mb: 2 }}
+                    value={category.name}
+                    onChange={(e) =>
+                      setCategory({ ...category, name: e.target.value })
+                    }
                   />
                   <TextField
                     label="Icon Name"
@@ -189,6 +339,10 @@ const Category = () => {
                     InputProps={{ endAdornment: <AppsOutlined /> }}
                     placeholder="Icon Name in snake-case"
                     sx={{ mb: 2 }}
+                    value={category.icon}
+                    onChange={(e) =>
+                      setCategory({ ...category, icon: e.target.value })
+                    }
                   />
                   <TextField
                     label="Color"
@@ -196,6 +350,10 @@ const Category = () => {
                     InputProps={{ endAdornment: <PaletteOutlined /> }}
                     placeholder="Icon Color HEX or RGB"
                     sx={{ mb: 2 }}
+                    value={category.color}
+                    onChange={(e) =>
+                      setCategory({ ...category, color: e.target.value })
+                    }
                   />
                 </Box>
                 <Box
@@ -210,6 +368,14 @@ const Category = () => {
                     color="error"
                     startIcon={<ClearAll />}
                     fullWidth
+                    onClick={() => {
+                      setCategory({
+                        iconFamily: "material",
+                        name: "",
+                        icon: "",
+                        color: "",
+                      });
+                    }}
                   >
                     Clear
                   </Button>
@@ -219,6 +385,17 @@ const Category = () => {
                     startIcon={<Save />}
                     fullWidth
                     type="submit"
+                    onClick={() => {
+                      addcategory(
+                        category,
+                        setCategory({
+                          iconFamily: "material",
+                          name: "",
+                          icon: "",
+                          color: "",
+                        })
+                      );
+                    }}
                   >
                     Save
                   </Button>
@@ -272,8 +449,9 @@ const Category = () => {
                     sx={{ color: selectedCategory?.color }}
                     style={{ fontSize: 80 }}
                   >
-                    {selectedCategory?.icon}
+                    {replaceHyphens(selectedCategory?.icon)}
                   </Icon>
+                  <i className="electric-car"></i>
                 </Avatar>
               </Box>
               <Box
@@ -312,7 +490,7 @@ const Category = () => {
                     textAlign={"center"}
                     variant="body1"
                   >
-                    5
+                    {count}
                   </Typography>
                   <Typography
                     color={"#1a1a1a"}
@@ -335,6 +513,8 @@ const Category = () => {
                   color="error"
                   startIcon={<DeleteForever />}
                   fullWidth
+                  disabled={count > 0}
+                  onClick={() => setOpen(true)}
                 >
                   Delete
                 </Button>
@@ -344,9 +524,17 @@ const Category = () => {
                   startIcon={<Edit />}
                   fullWidth
                   type="submit"
+                  onClick={() => setIsEditing(true)}
                 >
                   Edit
                 </Button>
+                <DeleteModal
+                  open={open}
+                  setOpen={setOpen}
+                  value={selectedCategory}
+                  handleDelete={() => deleteCategories(selectedCategory?._id)}
+                  type={"category"}
+                />
               </Box>
             </Card>
           </Grid>

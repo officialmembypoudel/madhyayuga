@@ -5,7 +5,6 @@ export const sendToken = (res, user, statusCode, message) => {
     expires: new Date(
       Date.now() + process.env.JWT_EXPIRE * 24 * 60 * 60 * 1000
     ),
-    domain: "localhost",
   };
 
   const userData = {
@@ -16,6 +15,12 @@ export const sendToken = (res, user, statusCode, message) => {
     avatar: user.avatar,
     verified: user.verified,
     createdAt: user.createdAt,
+    rating: user.rating,
+    totalRating: user.totalRating,
+    credit: user.credit,
+    isAdmin: user.isAdmin,
+    suspended: user.suspended,
+    expoPushToken: user.expoPushToken,
   };
 
   res

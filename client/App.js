@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 // import { createTheme, lightColors, ThemeProvider, useTheme } from "@rneui/themed";
 // import { lightColors } from "@rneui/base";
 import { StatusBar } from "expo-status-bar";
 import { NavigationContainer } from "@react-navigation/native";
+import { StripeProvider } from "@stripe/stripe-react-native";
 import {
   useFonts,
   Montserrat_100Thin,
@@ -24,7 +25,7 @@ import {
   Montserrat_900Black,
   Montserrat_900Black_Italic,
 } from "@expo-google-fonts/montserrat";
-import { Text, View } from "react-native";
+import { Text, View, Platform } from "react-native";
 import { containerStyles } from "./helpers/objects";
 import {
   Poppins_100Thin,
@@ -73,7 +74,8 @@ import { Router } from "./navigator/StackNavigator";
 import { Provider } from "react-redux";
 import { store } from "./store";
 import ChatProvider from "./context/chatContext";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import NotificationProvider from "./context/Notification";
 
 const theme = createTheme({
   lightColors: {
@@ -138,6 +140,7 @@ export default function App() {
     OpenSans_800ExtraBold,
     OpenSans_800ExtraBold_Italic,
   });
+
   if (!fontsLoaded) {
     return (
       <View
@@ -154,20 +157,24 @@ export default function App() {
     );
   } else {
     return (
-      <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaProvider style={{ flex: 1 }}>
         <ThemeProvider theme={theme}>
           <Provider store={store}>
-            <StatusBar style="auto" />
-            <NavigationContainer>
-              <AuthProvider>
-                <ChatProvider>
-                  <Router />
-                </ChatProvider>
-              </AuthProvider>
-            </NavigationContainer>
+            <StripeProvider publishableKey="pk_test_51P5q9604CXIBvEqFMAKJjjtvADRHBVHJb6PtsuRYGx2G66Fz9vioJNh7ohpHbXXijyklOoCXrL0rDpAPtC8CnRGf00g5lTJqD8">
+              <StatusBar style="auto" />
+              <NavigationContainer>
+                <NotificationProvider>
+                  <AuthProvider>
+                    <ChatProvider>
+                      <Router />
+                    </ChatProvider>
+                  </AuthProvider>
+                </NotificationProvider>
+              </NavigationContainer>
+            </StripeProvider>
           </Provider>
         </ThemeProvider>
-      </SafeAreaView>
+      </SafeAreaProvider>
     );
   }
 }

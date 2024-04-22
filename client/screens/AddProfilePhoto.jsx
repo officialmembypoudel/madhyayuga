@@ -17,13 +17,17 @@ import { AuthContext } from "../context/authContext";
 import profileImg from "../assets/profile.png";
 import { client } from "../configs/axios";
 import mime from "mime";
+import ScreenHeaderComponent from "../components/ScreenHeaderComponent";
 
-const AddProfilePhoto = () => {
+const AddProfilePhoto = ({ route }) => {
   const style = useTheme();
   const navigation = useNavigation();
   const { user, setUser, setIsSignedIn } = useContext(AuthContext);
   const [selectedImg, setSelectedImg] = useState(null);
   const [loading, setLoading] = useState(false);
+  const { header } = route.params;
+
+  console.log(user);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -60,10 +64,13 @@ const AddProfilePhoto = () => {
         setUser(response.data.user);
         setSelectedImg(null);
         setIsSignedIn(true);
+        if (header) {
+          navigation.navigate("Profile");
+        }
       }
     } catch (error) {
       console.log("Failed to add photo");
-      console.log(error.response);
+      console.log(error.response.data);
       setLoading(false);
     }
   };
@@ -75,34 +82,46 @@ const AddProfilePhoto = () => {
         backgroundColor: style.theme.colors.background,
       }}
     >
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          marginBottom: 20,
-          justifyContent: "space-between",
-          width: "100%",
-        }}
-      >
-        <TouchableOpacity
-          onPress={() => {}}
+      {header ? (
+        <ScreenHeaderComponent
+          title={"Edit Profile Image"}
+          hideModeToggle={true}
+          backAction={() => {
+            navigation.navigate("Profile");
+            setSelectedImg(null);
+          }}
+        />
+      ) : (
+        <View
           style={{
             flexDirection: "row",
             alignItems: "center",
-            // marginBottom: 20,
+            marginBottom: 20,
+            justifyContent: "space-between",
+            width: "100%",
           }}
         >
-          <Text
-            h4
-            h4Style={{
-              fontFamily: `${defaultFont}_600SemiBold`,
-              fontWeight: "600",
+          <TouchableOpacity
+            onPress={() => {}}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              // marginBottom: 20,
             }}
           >
-            Add Photo
-          </Text>
-        </TouchableOpacity>
-      </View>
+            <Text
+              h4
+              h4Style={{
+                fontFamily: `${defaultFont}_600SemiBold`,
+                fontWeight: "600",
+              }}
+            >
+              Add Photo
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       <View style={{ width: "100%", justifyContent: "space-between", flex: 1 }}>
         <View>
           <Text
@@ -111,44 +130,87 @@ const AddProfilePhoto = () => {
               fontSize: 15,
               marginBottom: 5,
             }}
-          >{`Hello, ${user.name}! Add a profile photo to continue.`}</Text>
+          >
+            {header
+              ? `Hello, ${user.name}! Select another profile photo to continue.`
+              : `Hello, ${user.name}! Add a profile photo to continue.`}
+          </Text>
         </View>
-        <Avatar
-          size={"xlarge"}
-          source={selectedImg ? { uri: selectedImg.uri } : profileImg}
-          rounded
-          containerStyle={{
-            alignSelf: "center",
-            elevation: 0,
-            borderRadius: 80,
-            borderWidth: 1,
-            borderColor: style.theme.colors.primary,
-            padding: 0,
-            backgroundColor: style.theme.colors.grey3,
-          }}
-          imageProps={{
-            style: {
-              width: "100%",
-              margin: 0,
+        {header ? (
+          <Avatar
+            size={"xlarge"}
+            source={{ uri: selectedImg ? selectedImg.uri : user.avatar.url }}
+            rounded
+            containerStyle={{
+              alignSelf: "center",
+              elevation: 0,
+              borderRadius: 80,
+              borderWidth: 1,
+              borderColor: style.theme.colors.primary,
               padding: 0,
-            },
-          }}
-          onPress={pickImage}
-        >
-          <Avatar.Accessory
-            size={30}
-            color={"rgb(245, 241, 237)"}
-            iconProps={{
-              name: "camera",
+              backgroundColor: style.theme.colors.grey3,
             }}
-            style={{
-              marginBottom: 15,
-              backgroundColor: style.theme.colors.primary,
-              marginRight: 2,
+            imageProps={{
+              style: {
+                width: "100%",
+                margin: 0,
+                padding: 0,
+              },
             }}
             onPress={pickImage}
-          />
-        </Avatar>
+          >
+            <Avatar.Accessory
+              size={30}
+              color={"rgb(245, 241, 237)"}
+              iconProps={{
+                name: "camera",
+              }}
+              style={{
+                marginBottom: 15,
+                backgroundColor: style.theme.colors.primary,
+                marginRight: 2,
+              }}
+              onPress={pickImage}
+            />
+          </Avatar>
+        ) : (
+          <Avatar
+            size={"xlarge"}
+            source={selectedImg ? { uri: selectedImg.uri } : profileImg}
+            rounded
+            containerStyle={{
+              alignSelf: "center",
+              elevation: 0,
+              borderRadius: 80,
+              borderWidth: 1,
+              borderColor: style.theme.colors.primary,
+              padding: 0,
+              backgroundColor: style.theme.colors.grey3,
+            }}
+            imageProps={{
+              style: {
+                width: "100%",
+                margin: 0,
+                padding: 0,
+              },
+            }}
+            onPress={pickImage}
+          >
+            <Avatar.Accessory
+              size={30}
+              color={"rgb(245, 241, 237)"}
+              iconProps={{
+                name: "camera",
+              }}
+              style={{
+                marginBottom: 15,
+                backgroundColor: style.theme.colors.primary,
+                marginRight: 2,
+              }}
+              onPress={pickImage}
+            />
+          </Avatar>
+        )}
         <Button
           loading={loading}
           disabled={!selectedImg}
@@ -158,6 +220,7 @@ const AddProfilePhoto = () => {
           }}
           containerStyle={{
             borderRadius: 5,
+            marginBottom: header ? 90 : 30,
             marginVertical: 30,
           }}
           buttonStyle={{ paddingVertical: 13 }}

@@ -13,6 +13,7 @@ import { StyleSheet, View } from "react-native";
 import React, { useState } from "react";
 import homeIcon from "../assets/madhyaYugTransparent.png";
 import { defaultFont } from "../fontConfig/defaultFont";
+import { useDispatch } from "react-redux";
 
 const CategoryCard = ({ category }) => {
   const style = useTheme();

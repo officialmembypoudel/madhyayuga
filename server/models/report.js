@@ -9,7 +9,6 @@ const reportSchema = new mongoose.Schema({
   listing: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "listings",
-    required: true,
   },
   reportedUser: {
     type: mongoose.Schema.Types.ObjectId,

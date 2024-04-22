@@ -40,6 +40,7 @@ import { fetchAllComments, getAllComments } from "../store/comments";
 import { ChatContext } from "../context/chatContext";
 import ItemDetailsTab from "../components/ItemDetailsTab";
 import StyledCard from "../components/StyledCard";
+import UserRating from "../components/UserRating";
 
 export const CommentComponent = ({ comment, replyTo, setReplyTo }) => {
   const { mode } = useThemeMode();
@@ -478,7 +479,6 @@ const ItemDisplayScreen = ({ route }) => {
       }
     };
     updateViews();
-    console.log("running", "item");
   }, [item]);
   useEffect(() => {
     const checkFavorite = async () => {
@@ -529,7 +529,12 @@ const ItemDisplayScreen = ({ route }) => {
         <View
           style={{
             ...containerStyles,
-            backgroundColor: style.theme.colors.background,
+            backgroundColor:
+              item?.creditExpiry > new Date(Date.now()).toISOString()
+                ? mode === "dark"
+                  ? "rgba(184, 134, 11, 0.5)"
+                  : "rgba(253, 227, 127, 0.7)"
+                : style.theme.colors.background,
           }}
         >
           <ScrollView
@@ -560,19 +565,36 @@ const ItemDisplayScreen = ({ route }) => {
                 borderRadius: 10,
                 //   width: 105,
                 elevation: 1,
+                height: 219,
                 // position: "relative",
               }}
             >
-              <Avatar
-                title={`${item?.name} image`}
-                source={{ uri: setImageQuality(item?.images[0]?.url, 35) }}
-                containerStyle={{
-                  backgroundColor: style.theme.colors.grey3,
-                  width: "100%",
-                  height: 250,
-                  borderRadius: 8,
-                }}
-                imageProps={{ borderRadius: 8 }}
+              <FlatList
+                horizontal
+                keyExtractor={(item) => item._id}
+                data={item.images}
+                style={{ width: "100%" }}
+                showsHorizontalScrollIndicator={false}
+                renderItem={({ item }) => (
+                  <Avatar
+                    title={`${item?.name} image`}
+                    source={{ uri: setImageQuality(item.url, 35) }}
+                    containerStyle={{
+                      backgroundColor: style.theme.colors.grey3,
+                      width:
+                        newItem?.images?.length > 1
+                          ? Dimensions.get("window").width - 60
+                          : Dimensions.get("window").width - 40,
+                      height: 199,
+                      flex: 1,
+
+                      borderRadius: 8,
+                      // aspectRatio: 4 / 3,
+                      marginRight: 10,
+                    }}
+                    imageProps={{ borderRadius: 8, resizeMode: "cover" }}
+                  />
+                )}
               />
             </Card>
 
@@ -674,6 +696,47 @@ const ItemDisplayScreen = ({ route }) => {
                 />
               </View>
             </Card>
+
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("UserDetails", {
+                  user: user,
+                  backScreen: "Item",
+                  item: item,
+                })
+              }
+            >
+              <StyledCard>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Avatar
+                    rounded
+                    size={"large"}
+                    source={{ uri: setImageQuality(user?.avatar?.url, 35) }}
+                    title="img"
+                  />
+                  <View style={{ marginLeft: 10 }}>
+                    <NormalDataTextComponent text={user?.name} />
+                    <UserRating
+                      rating={user?.rating}
+                      total={user?.totalRating}
+                    />
+                    <NormalDataTextComponent
+                      text={user?.email}
+                      fontFamily={`${defaultFont}_500Medium`}
+                      fontSize={14}
+                    />
+                    <NormalDataTextComponent
+                      text={user?.phone}
+                      fontFamily={`${defaultFont}_500Medium`}
+                      fontSize={14}
+                    />
+                  </View>
+                </View>
+              </StyledCard>
+            </TouchableOpacity>
+            {/* <StyledCard> */}
+            <ItemDetailsTab item={item} />
+
             <TouchableOpacity
               onPress={() => navigation.navigate("ReportListing", { item })}
             >
@@ -735,33 +798,6 @@ const ItemDisplayScreen = ({ route }) => {
                 <Icon name="arrow-right" type="octicon" color={"#fff"} />
               </Card>
             </TouchableOpacity>
-
-            <StyledCard>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Avatar
-                  rounded
-                  size={"large"}
-                  source={{ uri: setImageQuality(user?.avatar?.url, 35) }}
-                  title="img"
-                />
-                <View style={{ marginLeft: 10 }}>
-                  <NormalDataTextComponent text={user?.name} />
-                  <NormalDataTextComponent
-                    text={user?.email}
-                    fontFamily={`${defaultFont}_500Medium`}
-                    fontSize={14}
-                  />
-                  <NormalDataTextComponent
-                    text={user?.phone}
-                    fontFamily={`${defaultFont}_500Medium`}
-                    fontSize={14}
-                  />
-                </View>
-              </View>
-            </StyledCard>
-            {/* <StyledCard> */}
-            <ItemDetailsTab item={item} />
-
             {/* <ItemDetailsTabOne item={item} /> */}
             {/* </StyledCard> */}
           </ScrollView>

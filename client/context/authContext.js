@@ -2,12 +2,14 @@ import React, { createContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useThemeMode } from "@rneui/themed";
 import { client } from "../configs/axios";
+import { useNotification } from "./Notification";
 
 export const AuthContext = createContext();
 const AuthProvider = ({ children }) => {
   //   const { navigate } = useNavigation();
   const { setMode } = useThemeMode();
   const [user, setUser] = useState({});
+  const { expoPushToken } = useNotification();
   const [loading, setLoading] = useState(true);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [authCheck, setAuthCheck] = useState(false);
@@ -17,23 +19,23 @@ const AuthProvider = ({ children }) => {
   const [loginMessage, setLoginMessage] = useState(null);
 
   useEffect(() => {
-    const getUser = async () => {
-      try {
-        const response = await client.get("/profile");
-        setUser(response.data.user);
-        if (response.data.user) {
-          setLoading(false);
-          setIsSignedIn(true);
-        }
-      } catch (error) {
-        console.log(error.response.data);
-        setUser({});
-        setLoading(false);
-        setIsSignedIn(false);
-      }
-    };
     getUser();
   }, [authCheck]);
+  const getUser = async () => {
+    try {
+      const response = await client.get("/profile");
+      setUser(response.data.user);
+      if (response.data.user) {
+        setLoading(false);
+        setIsSignedIn(true);
+      }
+    } catch (error) {
+      console.log(error.response.data);
+      setUser({});
+      setLoading(false);
+      setIsSignedIn(false);
+    }
+  };
 
   const login = async (email = "", password = "") => {
     try {
@@ -55,6 +57,12 @@ const AuthProvider = ({ children }) => {
         setLoadLogin(false);
         setUser(response.data.user);
         // setLoginMessage("Login Successful");
+        if (expoPushToken) {
+          const { user } = await sendDevicePushTokenToServer(expoPushToken);
+          if (user) {
+            setUser(user);
+          }
+        }
       }
     } catch (error) {
       console.log(error.response.data);
@@ -94,6 +102,23 @@ const AuthProvider = ({ children }) => {
     checkIfMOdeExist();
   }, []);
 
+  const sendDevicePushTokenToServer = async () => {
+    const response = await client.patch(
+      "/users/me/add-push-token",
+      {
+        token: expoPushToken,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const { user, error } = response.data;
+
+    return { user, error };
+  };
+
   return (
     <>
       <AuthContext.Provider
@@ -113,6 +138,8 @@ const AuthProvider = ({ children }) => {
           loadLogin,
           loginMessage,
           setLoginMessage,
+          getUser,
+          sendDevicePushTokenToServer,
         }}
       >
         {children}

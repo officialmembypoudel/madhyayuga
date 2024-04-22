@@ -62,13 +62,25 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  expoPushToken: {
+    type: String,
+    default: null,
+  },
 });
 
 userSchema.pre("save", async function (next) {
   this.searchText = this.name + " " + this.email + " " + this.phone;
+
   if (!this.isModified("password")) return next();
   const salt = await bcrypt.genSalt(15);
   this.password = await bcrypt.hash(this.password, salt);
+});
+
+userSchema.pre("findOneAndUpdate", async function (next) {
+  if (!this._update.password) return next();
+  const salt = await bcrypt.genSalt(15);
+  this._update.password = await bcrypt.hash(this._update.password, salt);
+  next();
 });
 
 userSchema.index(

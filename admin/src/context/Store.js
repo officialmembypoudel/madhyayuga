@@ -15,6 +15,8 @@ const StoreProvider = ({ children }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [reportMessages, setReportMessages] = useState({ documents: [] });
+  const [locations, setLocations] = useState({ documents: [] });
+  const [selectedLocation, setSelectedLocation] = useState(null);
 
   const fetchListings = async () => {
     try {
@@ -122,16 +124,48 @@ const StoreProvider = ({ children }) => {
     }
   };
 
-  const updateCategories = async (id, data) => {
+  const addcategory = async (category, callBack) => {
+    try {
+      setLoading(true);
+      const res = await client.post("/categories/add", category, {
+        headers: {
+          Authorization: `Bearer ${getCookie("token")}`,
+        },
+      });
+      res.data && fetchCategories();
+      res.data && setLoading(false);
+      res.data && callBack();
+    } catch (error) {
+      setLoading(false);
+      setError(error?.response?.data?.message);
+    }
+  };
+
+  const getCategoryListingCount = async (id) => {
+    try {
+      const res = await client.get(`/listings/${id}/count`, {
+        headers: {
+          Authorization: `Bearer ${getCookie("token")}`,
+        },
+      });
+      return res.data?.total;
+    } catch (error) {
+      setError(error?.response?.data?.message);
+    }
+  };
+
+  const updateCategories = async (data, callBack) => {
     try {
       setUpdateLoading(true);
-      const res = await client.put(`/categories/update/${id}`, data, {
+      const res = await client.put(`/categories/update/${data._id}`, data, {
         headers: {
           Authorization: `Bearer ${getCookie("token")}`,
         },
       });
       res.data && setUpdateLoading(false);
       res.data && fetchCategories();
+      res.data && callBack();
+      return res.data?.document;
     } catch (error) {
       setUpdateLoading(false);
       setError(error?.response?.data?.message);
@@ -148,6 +182,83 @@ const StoreProvider = ({ children }) => {
       });
       res.data && setUpdateLoading(false);
       res.data && fetchCategories();
+    } catch (error) {
+      setUpdateLoading(false);
+      setError(error?.response?.data?.message);
+    }
+  };
+
+  const fetchLocations = async () => {
+    try {
+      setLoading(true);
+      const res = await client.get("/locations");
+      setLocations(res.data);
+      res.data && setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      setError(error?.response?.data?.message);
+    }
+  };
+
+  const getLocationListingCount = async (city) => {
+    try {
+      const res = await client.get(`/listings/location/${city}/count`, {
+        headers: {
+          Authorization: `Bearer ${getCookie("token")}`,
+        },
+      });
+      return res.data?.total;
+    } catch (error) {
+      setError(error?.response?.data?.message);
+    }
+  };
+
+  const addLocation = async (location, callBack) => {
+    try {
+      setLoading(true);
+      const res = await client.post("/locations/add", location, {
+        headers: {
+          Authorization: `Bearer ${getCookie("token")}`,
+        },
+      });
+      res.data && fetchLocations();
+      res.data && setLoading(false);
+      res.data && callBack();
+    } catch (error) {
+      setLoading(false);
+      setError(error?.response?.data?.message);
+    }
+  };
+
+  const updateLocation = async (data, callBack) => {
+    try {
+      setUpdateLoading(true);
+      const res = await client.put(`/locations/update/${data._id}`, data, {
+        headers: {
+          Authorization: `Bearer ${getCookie("token")}`,
+        },
+      });
+      res.data && setUpdateLoading(false);
+      res.data && fetchLocations();
+      res.data && callBack();
+      setSelectedLocation(res.data?.document);
+    } catch (error) {
+      setUpdateLoading(false);
+      setError(error?.response?.data?.message);
+    }
+  };
+
+  const deleteLocation = async (id) => {
+    try {
+      setUpdateLoading(true);
+      const res = await client.delete(`/locations/update/${id}`, {
+        headers: {
+          Authorization: `Bearer ${getCookie("token")}`,
+        },
+      });
+      res.data && setUpdateLoading(false);
+      res.data && fetchLocations();
+      res.data && setSelectedLocation(null);
     } catch (error) {
       setUpdateLoading(false);
       setError(error?.response?.data?.message);
@@ -317,6 +428,8 @@ const StoreProvider = ({ children }) => {
         setUsers,
         setReports,
         fetchCategories,
+        addcategory,
+        getCategoryListingCount,
         selectCategory,
         fetchListings,
         rejectListings,
@@ -335,6 +448,14 @@ const StoreProvider = ({ children }) => {
         fetchReportMessages,
         reportMessages,
         setReportMessages,
+        fetchLocations,
+        addLocation,
+        updateLocation,
+        deleteLocation,
+        setSelectedLocation,
+        selectedLocation,
+        locations,
+        getLocationListingCount,
       }}
     >
       {children}
@@ -382,6 +503,16 @@ export const useStore = () => {
     fetchReportMessages,
     reportMessages,
     setReportMessages,
+    addcategory,
+    getCategoryListingCount,
+    fetchLocations,
+    addLocation,
+    updateLocation,
+    deleteLocation,
+    setSelectedLocation,
+    selectedLocation,
+    locations,
+    getLocationListingCount,
   } = useContext(StoreContext);
 
   return {
@@ -421,5 +552,15 @@ export const useStore = () => {
     fetchReportMessages,
     reportMessages,
     setReportMessages,
+    addcategory,
+    getCategoryListingCount,
+    fetchLocations,
+    addLocation,
+    updateLocation,
+    deleteLocation,
+    setSelectedLocation,
+    locations,
+    selectedLocation,
+    getLocationListingCount,
   };
 };

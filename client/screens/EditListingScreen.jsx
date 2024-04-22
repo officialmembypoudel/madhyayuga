@@ -31,6 +31,8 @@ import { useDispatch } from "react-redux";
 import { fetchAllListings, userListings } from "../store/listings";
 import { client } from "../configs/axios";
 
+import mime from "mime";
+
 const defaultInputs = {
   name: "",
   with: "",
@@ -56,28 +58,76 @@ const EditListingScreen = ({ route }) => {
     setNewListing({ ...item });
   }, [item]);
 
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+
+      aspect: [4, 3],
+      quality: 1,
+      allowsMultipleSelection: true,
+      selectionLimit: 3,
+    });
+
+    if (!result.canceled) {
+      setSelectedImg(result.assets);
+    }
+  };
+
   const updateListing = async () => {
     setLoading(true);
     try {
-      const response = await client.put(
-        `/listings/update/${item._id}`,
-        newListing
-      );
-      console.log(response.data);
-      if (response.data.success) {
-        dispatch(fetchAllListings());
-        dispatch(userListings());
-        setLoading(false);
-        navigation.navigate("myListings");
+      if (selectedImg) {
+        const data = new FormData();
+        data.append("name", newListing.name);
+        data.append("description", newListing.description);
+        data.append("condition", newListing.condition);
+        data.append("location", newListing.location);
+        data.append("with", newListing.with);
+        // data.append("categoryId", newListing.category._id);ß
+        selectedImg.forEach((img) => {
+          data.append("images", {
+            uri: img.uri,
+            type: mime.getType(img.uri),
+            name: img?.uri?.split("/").pop(),
+          });
+        });
+        const response = await client.put(
+          `/listings/update/${item._id}`,
+          data,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        if (response.data.success) {
+          dispatch(fetchAllListings());
+          dispatch(userListings());
+          setLoading(false);
+          navigation.navigate("myListings");
+          setSelectedImg(null);
+        }
       } else {
-        console.log(response.data.message);
+        const response = await client.put(
+          `/listings/update/${item._id}`,
+          newListing
+        );
+        console.log(response.data);
+        if (response.data.success) {
+          dispatch(fetchAllListings());
+          dispatch(userListings());
+          setLoading(false);
+          navigation.navigate("myListings");
+        } else {
+          console.log(response.data.message);
+        }
       }
     } catch (error) {
-      console.log(error.data.message);
       setLoading(false);
+      console.log(error?.response?.data);
+      console.log(error.message);
     }
   };
-  console.log(newListing);
   return (
     <View
       style={{
@@ -86,7 +136,75 @@ const EditListingScreen = ({ route }) => {
       }}
     >
       <ScreenHeaderComponent title={`Edit ${item.name}`} />
-      <ScrollView style={{ width: "100%" }}>
+      <ScrollView
+        style={{ width: "100%" }}
+        contentContainerStyle={{ paddingBottom: 90 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <TouchableOpacity
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-around",
+            width: "100%",
+          }}
+          onPress={() => {
+            pickImage();
+          }}
+        >
+          {selectedImg
+            ? selectedImg?.map((img) => (
+                <Avatar
+                  key={img.uri}
+                  source={{ uri: img.uri }}
+                  containerStyle={{
+                    alignSelf: "center",
+                    height: 100,
+                    width: 100,
+                    marginBottom: 15,
+                    borderRadius: 10,
+                    backgroundColor: theme.colors.grey4,
+                    padding: 2,
+                  }}
+                  imageProps={{ borderBottomRightRadius: 15, borderRadius: 5 }}
+                >
+                  <Avatar.Accessory
+                    size={30}
+                    color={"rgb(245, 241, 237)"}
+                    iconProps={{
+                      name: "delete",
+                    }}
+                    style={{
+                      // marginBottom: 15,
+                      backgroundColor: theme.colors.error,
+                      marginRight: 2,
+                    }}
+                    onPress={() => {
+                      setSelectedImg(
+                        selectedImg.filter((image) => image.uri !== img.uri)
+                      );
+                      if (selectedImg.length === 1) {
+                        setSelectedImg(null);
+                      }
+                    }}
+                  />
+                </Avatar>
+              ))
+            : item?.images?.map((img) => (
+                <Avatar
+                  key={img.url}
+                  source={{ uri: img.url }}
+                  containerStyle={{
+                    alignSelf: "center",
+                    height: 100,
+                    width: 100,
+                    marginBottom: 15,
+                    // borderRadius: 10,
+                    marginRight: "auto",
+                  }}
+                  imageProps={{ borderBottomRightRadius: 15, borderRadius: 5 }}
+                />
+              ))}
+        </TouchableOpacity>
         <View>
           <Text
             style={{

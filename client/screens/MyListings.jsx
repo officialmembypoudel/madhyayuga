@@ -80,6 +80,17 @@ const EditUpdateCard = ({ item }) => {
             onPress={() => navigation.navigate("EditListing", { item })}
           />
           <Button
+            title="Credit"
+            color="primary"
+            radius={10}
+            icon={{ name: "add", color: "#f2f2f2" }}
+            onPress={() => navigation.navigate("AddCredit", { item })}
+            disabled={item?.creditExpiry > new Date(Date.now()).toISOString()}
+            buttonStyle={{
+              flex: 1,
+            }}
+          />
+          <Button
             loading={loading}
             title="Delete"
             type="outline"
@@ -88,6 +99,7 @@ const EditUpdateCard = ({ item }) => {
               borderColor: "#dc3545",
               borderWidth: 2,
               borderRadius: 10,
+              flex: 1,
             }}
             titleStyle={{ color: "#dc3545" }}
             icon={{ name: "delete", color: "#dc3545" }}

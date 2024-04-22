@@ -23,6 +23,7 @@ io.on("connection", (socket) => {
       users.push({ id: socket.id, user });
     }
     io.emit("onlineUsers", users);
+    console.log(users, "online users");
   });
 
   socket.on("sendMessage", (message) => {
@@ -44,8 +45,10 @@ io.on("connection", (socket) => {
     console.log("User disconnected");
     users = users.filter((u) => u.id !== socket.id);
     io.emit("onlineUsers", users);
+    console.log(users, "online users");
   });
 });
+
 server.listen(process.env.PORT, () => {
   console.log("server is running on port " + process.env.PORT);
 });

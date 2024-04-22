@@ -15,7 +15,11 @@ import { ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { defaultFont } from "../fontConfig/defaultFont";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAllCategories, getAllCategories } from "../store/listings";
+import {
+  fetchAllCategories,
+  fetchListingsByCategory,
+  getAllCategories,
+} from "../store/listings";
 // import { Icon } from "@rneui/base";
 
 export const array = [
@@ -95,7 +99,16 @@ const CategoryComponent = () => {
         showsHorizontalScrollIndicator={false}
       >
         {categories.slice(0, 5).map((category) => (
-          <TouchableOpacity key={category._id} style={styles.box}>
+          <TouchableOpacity
+            onPress={() => {
+              dispatch(fetchListingsByCategory({ categoryId: category._id }));
+              navigation.navigate("ListingByCategory", {
+                categoryId: category._id,
+              });
+            }}
+            key={category._id}
+            style={styles.box}
+          >
             <Avatar
               icon={{
                 name: category.icon,

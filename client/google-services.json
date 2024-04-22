@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1088706884636",
+    "project_id": "madhyayuga-187df",
+    "storage_bucket": "madhyayuga-187df.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1088706884636:android:1841bffbb48b311c589bd9",
+        "android_client_info": {
+          "package_name": "com.officialmemby.madhyayuga"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDF7SA5poBhksLt1p63-qxhYGhHft_K4h8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

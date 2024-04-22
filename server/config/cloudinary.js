@@ -15,7 +15,9 @@ export const storage = new CloudinaryStorage({
   params: {
     folder: "Madhyayuga",
     allowedFormat: ["jpeg", "jpg", "png", "webp"],
+    
   },
+  
 });
 
 export const upload = multer({ storage });

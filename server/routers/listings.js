@@ -1,11 +1,16 @@
 import express from "express";
 import { isAdmin, isAuthenticated } from "../middleware/auth.js";
 import {
+  addCredit,
   addListing,
   deleteListing,
+  getCategoryListingCount,
   getListings,
+  getListingsByCategory,
+  getLocationListingCount,
   getMyListings,
   rejectUnrejectListing,
+  searchListings,
   updateListing,
   updateListingViews,
 } from "../controllers/listings.js";
@@ -29,16 +34,24 @@ import {
 const router = express.Router();
 
 router.route("/listings").get(getListings);
+router.route("/listings/search").get(searchListings);
+router.route("/listings/search/:categoryId").get(getListingsByCategory);
+router
+  .route("/listings/:categoryId/count")
+  .get(isAuthenticated, getCategoryListingCount);
+router
+  .route("/listings/location/:city/count")
+  .get(isAuthenticated, getLocationListingCount);
 
 router.route("/listings/my").get(isAuthenticated, getMyListings);
 
 router
   .route("/listings/add")
-  .post(isAuthenticated, upload.single("avatar"), addListing);
+  .post(isAuthenticated, upload.array("images"), addListing);
 
 router
   .route("/listings/update/:listingId")
-  .put(isAuthenticated, updateListing)
+  .put(isAuthenticated, upload.array("images"), updateListing)
   .delete(isAuthenticated, deleteListing);
 
 router.route("/listings/update/views/:listingId").patch(updateListingViews);
@@ -83,5 +96,8 @@ router
 router
   .route("/listings/:listingId/reject")
   .post(isAuthenticated, isAdmin, rejectUnrejectListing);
+router
+  .route("/listings/:listingId/add-credit")
+  .patch(isAuthenticated, addCredit);
 
 export default router;

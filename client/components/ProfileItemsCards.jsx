@@ -41,15 +41,15 @@ const ProfileItemsCards = ({
       <Card
         containerStyle={{
           padding: 10,
-          backgroundColor:
-            mode === "dark" ? style.theme.colors.grey4 : "#FAFAFF",
+          backgroundColor: mode === "dark" ? style.theme.colors.grey4 : "#fff",
           borderWidth: 0,
           borderRadius: 10,
           width: "100%",
           //   height: 70,
-          elevation: 0,
+          elevation: 1,
           //   padding: 0,
           margin: 0,
+          shadowColor: "grey",
         }}
         wrapperStyle={{
           alignItems: "center",
@@ -63,7 +63,7 @@ const ProfileItemsCards = ({
           icon={{
             name: icon,
             type: iconType,
-            color: mode === "light" ? iconColor : iconBackgroundColor,
+            color: mode === "light" ? iconColor : "#fff",
             size: 30,
           }}
           containerStyle={
@@ -75,9 +75,11 @@ const ProfileItemsCards = ({
           }
           iconStyle={{
             backgroundColor:
-              mode === "light" ? iconBackgroundColor : style.theme.colors.grey0,
+              mode === "light" ? iconBackgroundColor : style.theme.colors.grey4,
             padding: 10,
             borderRadius: 30,
+            borderWidth: 1,
+            borderColor: "lightgrey",
           }}
         />
         <Text
@@ -95,7 +97,7 @@ const ProfileItemsCards = ({
           rounded
           size="medium"
           icon={{
-            name: "md-chevron-forward",
+            name: "chevron-forward-outline",
             type: "ionicon",
             color: style.theme.colors.black,
             size: 25,

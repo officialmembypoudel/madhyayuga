@@ -52,11 +52,37 @@ export const addReport = async (req, res) => {
         url: image?.path,
       },
     });
-    sendMail(
-      contactEmail,
-      "Report Received",
-      `Your report with title ${title} has been received. We will get back to you soon.`
-    );
+    if (reportedUser) {
+      sendMail(
+        contactEmail,
+        "Report Received",
+        `Your report with title ${title} has been received. We will get back to you soon.
+        
+        We will take necessary actions on the users account if the report is found to be true.
+      
+      
+      
+      
+      Thank you for reporting.
+      Team Madhyayuga
+      madhyayuga@gmail.com`
+      );
+    } else {
+      sendMail(
+        contactEmail,
+        "Report Received",
+        `Your report with title ${title} has been received. We will get back to you soon.
+        
+        We will take necessary actions on the users account and listing if the report is found to be true.
+      
+      
+      
+      
+      Thank you for reporting.
+      Team Madhyayuga
+      madhyayuga@gmail.com`
+      );
+    }
     res.status(201).json({ success: true, report });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

@@ -33,6 +33,15 @@ const VerifyOTP = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const resendOTP = async () => {
+    try {
+      const response = await client.get("/verify");
+      console.log(response.data);
+    } catch (error) {
+      console.log(error?.response?.data);
+    }
+  };
+
   const VerifyOTP = async () => {
     setLoading(true);
     try {
@@ -129,17 +138,22 @@ const VerifyOTP = () => {
             inputStyle={{ fontFamily: `${defaultFont}_400Regular` }}
             errorMessage={error}
           />
-          <Text
-            style={{
-              fontFamily: `${defaultFont}_400Regular`,
-              fontSize: 15,
-              marginBottom: 5,
-              textAlign: "center",
-              color: style.theme.colors.primary,
-            }}
+          <TouchableOpacity
+            style={{ alignSelf: "flex-end" }}
+            onPress={resendOTP}
           >
-            Resend OTP
-          </Text>
+            <Text
+              style={{
+                fontFamily: `${defaultFont}_400Regular`,
+                fontSize: 15,
+                marginBottom: 5,
+                textAlign: "center",
+                color: style.theme.colors.primary,
+              }}
+            >
+              Resend OTP
+            </Text>
+          </TouchableOpacity>
         </View>
         <Card
           containerStyle={{

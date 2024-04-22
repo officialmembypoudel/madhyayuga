@@ -1,11 +1,13 @@
 import { StyleSheet, View, Image } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { containerStyles } from "../helpers/objects";
 import { Text, Button, useThemeMode, useTheme, Icon } from "@rneui/themed";
 import { useNavigation } from "@react-navigation/native";
 import ScreenHeaderComponent from "../components/ScreenHeaderComponent";
 import noInternetImg from "../assets/please-login.png";
 import { defaultFont } from "../fontConfig/defaultFont";
+import EditAccountModal from "../components/EditAccountModal";
+import { AuthContext } from "../context/authContext";
 
 const Details = ({ title, value, icon, iconType }) => {
   return (
@@ -35,9 +37,10 @@ const AccountDetailsScreen = ({ route }) => {
   const navigation = useNavigation();
   const [isDark, setIsDark] = useState(false);
   const { mode, setMode } = useThemeMode();
-  const { user, goBack } = route?.params;
+  const { goBack } = route?.params;
+  const { user } = useContext(AuthContext);
+  const [open, setOpen] = useState(false);
 
-  console.log("user", user);
   return (
     <View
       style={{
@@ -88,17 +91,15 @@ const AccountDetailsScreen = ({ route }) => {
             color={"success"}
             title="Edit Account"
             icon={
-              <Icon
-                name="edit"
-                //   color={style.theme.colors.primary}
-                style={{ marginRight: 20 }}
-              />
+              <Icon name="edit" color={"#fff"} style={{ marginRight: 20 }} />
             }
             titleStyle={{}}
             iconPosition="left"
             iconContainerStyle={{ marginRight: 20 }}
+            onPress={() => setOpen(true)}
           />
-          <Button
+          <EditAccountModal open={open} setOpen={setOpen} />
+          {/* <Button
             buttonStyle={{
               marginBottom: 20,
               borderRadius: 5,
@@ -118,7 +119,7 @@ const AccountDetailsScreen = ({ route }) => {
             titleStyle={{ color: style.theme.colors.error }}
             iconPosition="left"
             iconContainerStyle={{ marginRight: 20 }}
-          />
+          /> */}
         </View>
       </View>
     </View>

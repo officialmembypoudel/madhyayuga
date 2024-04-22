@@ -2,7 +2,7 @@ import { Cancel, DeleteForever } from "@mui/icons-material";
 import { Box, Button, Card, Modal, Typography, TextField } from "@mui/material";
 import React from "react";
 
-const DeleteModal = ({ open, setOpen, value, handleDelete }) => {
+const DeleteModal = ({ open, setOpen, value, handleDelete, type }) => {
   const [message, setMessage] = React.useState("");
   return (
     <Modal
@@ -31,26 +31,29 @@ const DeleteModal = ({ open, setOpen, value, handleDelete }) => {
         }}
       >
         <Typography color="error" variant="h6">
-          Delete {value?.name}
+          Delete {value?.name ?? value?.city}
         </Typography>
         <Typography variant="body1">
-          Are you sure you want to delete <strong>{value?.name}</strong>? You
-          cannot undo this action!
+          Are you sure you want to delete{" "}
+          <strong>{value?.name ?? value?.city}</strong>? You cannot undo this
+          action!
         </Typography>
 
         <Typography color="error" variant="body1" sx={{ mt: 2, mb: 1 }}>
           Please provide a reason for deleting this{" "}
-          <strong>{value?.name}</strong>.
+          <strong>{value?.name ?? value?.city}</strong>.
         </Typography>
 
-        <TextField
-          fullWidth
-          multiline
-          rows={4}
-          placeholder={`Reason why ${value?.name} is deleted.`}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-        />
+        {type === "location" ? null : type !== "category" ? (
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            placeholder={`Reason why ${value?.name} is deleted.`}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+        ) : null}
 
         <Box
           sx={{
@@ -69,19 +72,47 @@ const DeleteModal = ({ open, setOpen, value, handleDelete }) => {
           >
             Cancel
           </Button>
-          <Button
-            variant="contained"
-            startIcon={<DeleteForever />}
-            color="error"
-            sx={{ flex: 1 }}
-            disabled={!message}
-            onClick={() => {
-              handleDelete(value?._id, message);
-              setOpen(false);
-            }}
-          >
-            Delete
-          </Button>
+          {type === "category" ? (
+            <Button
+              variant="contained"
+              startIcon={<DeleteForever />}
+              color="error"
+              sx={{ flex: 1 }}
+              onClick={() => {
+                handleDelete(value?._id, message);
+                setOpen(false);
+              }}
+            >
+              Delete
+            </Button>
+          ) : type === "location" ? (
+            <Button
+              variant="contained"
+              startIcon={<DeleteForever />}
+              color="error"
+              sx={{ flex: 1 }}
+              onClick={() => {
+                handleDelete(value?._id, message);
+                setOpen(false);
+              }}
+            >
+              Delete
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              startIcon={<DeleteForever />}
+              color="error"
+              sx={{ flex: 1 }}
+              disabled={!message}
+              onClick={() => {
+                handleDelete(value?._id, message);
+                setOpen(false);
+              }}
+            >
+              Delete
+            </Button>
+          )}
         </Box>
       </Card>
     </Modal>

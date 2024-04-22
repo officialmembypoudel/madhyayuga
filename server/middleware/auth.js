@@ -6,7 +6,7 @@ export const isAuthenticated = async (req, res, next) => {
     let { token } = req.cookies;
 
     if (!token) {
-      token = req.headers.authorization.split(" ")[1];
+      token = req?.headers?.authorization?.split(" ")[1];
     }
 
     if (!token) {
@@ -14,13 +14,14 @@ export const isAuthenticated = async (req, res, next) => {
         .status(401)
         .json({ success: false, message: "You are not Logged in!" });
     }
-
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = await userModel.findById(decoded._id);
 
+    console.log("middleware", req.user);
     next();
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+    console.log("middleware", error.message);
   }
 };
 

@@ -9,12 +9,14 @@ import io from "socket.io-client";
 import { AuthContext } from "./authContext";
 import { client, serverAddress } from "../configs/axios";
 import { useNavigation } from "@react-navigation/native";
+import { useNotification } from "./Notification";
 
 export const ChatContext = createContext();
 
 const ChatProvider = ({ children }) => {
   const navigation = useNavigation();
   const { user } = useContext(AuthContext);
+  const { sendNotification } = useNotification();
   const [chatRooms, setChatRooms] = useState([]);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,7 +29,9 @@ const ChatProvider = ({ children }) => {
   const [receivedMessage, setReceivedMessage] = useState(null);
 
   useEffect(() => {
-    const newSocket = io(serverAddress);
+    const newSocket = io(serverAddress, {
+      transports: ["websocket"],
+    });
 
     newSocket.on("connect", () => {
       console.log("Socket connected");
@@ -61,23 +65,23 @@ const ChatProvider = ({ children }) => {
     if (socket) {
       socket.emit("sendMessage", { newMessage, recepient });
     }
-  }, [newMessage, recepient]);
-
+  }, [newMessage, recepient, socket]);
   useEffect(() => {
     if (socket) {
-      socket.on("newMessage", (message) => {
-        if (message.chatId !== currentChatRoom) return null;
+      const handleNewMessage = (message) => {
+        if (message.chatId !== currentChatRoom) return;
         setMessages((prevMessages) => [...prevMessages, message]);
         console.log("new message", message);
         setReceivedMessage(message);
-      });
-    }
+      };
 
-    return () => {
-      socket?.off("newMessage");
-      // setReceivedMessage(null);
-    };
-  }, [socket, currentChatRoom]);
+      socket.on("newMessage", handleNewMessage);
+
+      return () => {
+        socket.off("newMessage", handleNewMessage);
+      };
+    }
+  }, [socket, currentChatRoom, setMessages, setReceivedMessage]);
 
   useEffect(() => {
     if (receivedMessage === null) return;
@@ -134,7 +138,7 @@ const ChatProvider = ({ children }) => {
       setLoading(false);
     }
   };
-  const addMessage = async (chatId, message, ref, recepientId) => {
+  const addMessage = async (chatId, message, ref, recepient) => {
     try {
       setSendingMessage(true);
       const response = await client.post("/chats/messages/add", {
@@ -146,13 +150,25 @@ const ChatProvider = ({ children }) => {
       setMessages((prevMessages) => [...prevMessages, response.data.document]);
 
       setNewMessage(response.data.document);
-      setRecepient(recepientId);
+      console.log(recepient?._id, "recepient");
+      setRecepient(recepient?._id);
       ref.current.scrollToEnd({
         behavior: "smooth",
         block: "end",
         animated: "true",
       });
       response && setSendingMessage(false);
+      response &&
+        sendNotification({
+          title: "New message from " + user?.name,
+          body: message,
+          data: {
+            chatId,
+            sender: user._id,
+            message,
+          },
+          to: recepient?.expoPushToken,
+        });
       const newChatRooms = chatRooms.map((chatRoom) => {
         if (chatRoom._id === response?.data?.document?.chatId) {
           return {

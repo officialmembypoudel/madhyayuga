@@ -264,6 +264,7 @@ export default function ItemDetailsTab({ item }) {
             style={{
               fontFamily: `${defaultFont}_400Regular`,
               textAlign: "justify",
+              fontSize: 16,
             }}
           >
             {item?.description}

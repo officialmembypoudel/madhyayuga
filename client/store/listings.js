@@ -33,6 +33,40 @@ export const fetchAllListings = createAsyncThunk(
     }
   }
 );
+// Redux Thunk to fetch all listings
+export const fetchSearchListings = createAsyncThunk(
+  "listings/fetch/search",
+  async (params, { dispatch }) => {
+    try {
+      // Fetch listings from the server
+      const response = await client.get(
+        "/listings/search?query=" + params?.query
+      );
+      return response.data.documents;
+    } catch (error) {
+      // Log and rethrow the error to propagate it
+      console.error("listings fetch error", error.response.data);
+      throw error;
+    }
+  }
+);
+// Redux Thunk to fetch all listings
+export const fetchListingsByCategory = createAsyncThunk(
+  "listings/fetch/search/:categoryId",
+  async (params, { dispatch }) => {
+    try {
+      // Fetch listings from the server
+      const response = await client.get(
+        "/listings/search/" + params?.categoryId
+      );
+      return response.data.documents;
+    } catch (error) {
+      // Log and rethrow the error to propagate it
+      console.error("listings fetch error", error.response.data);
+      throw error;
+    }
+  }
+);
 
 // Redux Thunk to update views for a listing
 export const updateViews = createAsyncThunk(
@@ -169,12 +203,14 @@ export const fetchLocations = createAsyncThunk(
 // Initial state for the listings slice
 const initialState = {
   listings: [],
+  listingsByCategory: [],
   comments: {},
   userListings: [],
   categories: [],
   bids: [],
   locations: [],
   favourites: [],
+  searched: [],
 };
 
 // Redux Toolkit slice for managing listings state
@@ -204,6 +240,26 @@ const listings = createSlice({
         state.listings = payload;
       })
       .addCase(fetchAllListings.rejected, (state) => {
+        console.log("fetching searched listings rejected");
+      })
+      .addCase(fetchListingsByCategory.pending, (state) => {
+        console.log("fetching all listings");
+      })
+      .addCase(fetchListingsByCategory.fulfilled, (state, { payload }) => {
+        console.log("fetching all listings fulfilled");
+        state.listingsByCategory = payload;
+      })
+      .addCase(fetchListingsByCategory.rejected, (state) => {
+        console.log("fetching searched listings rejected");
+      })
+      .addCase(fetchSearchListings.pending, (state) => {
+        console.log("fetching searched listings");
+      })
+      .addCase(fetchSearchListings.fulfilled, (state, { payload }) => {
+        console.log("fetching searched listings fulfilled");
+        state.searched = payload;
+      })
+      .addCase(fetchSearchListings.rejected, (state) => {
         console.log("fetching all listings rejected");
       })
       // Reducer cases for userListings
@@ -255,6 +311,10 @@ export default listings.reducer;
 
 // Selectors to get specific parts of the listings state
 export const getAllListings = (state) => state.listings.listings;
+export const getSearchedListing = (state) => state.listings.searched;
+export const getListingByCategory = (state) => {
+  return state?.listings?.listingsByCategory;
+};
 export const getAllCategories = (state) => state.listings.categories;
 export const getUserListings = (state) => state.listings.userListings;
 export const getBids = (state) => state.listings.bids;

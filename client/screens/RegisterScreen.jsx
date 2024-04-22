@@ -27,6 +27,7 @@ import { client } from "../configs/axios";
 import * as yup from "yup";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useNotification } from "../context/Notification";
 
 const defaultUserValue = {
   name: "",
@@ -59,7 +60,9 @@ const schema = yup.object().shape({
 
 const RegisterScreen = () => {
   const style = useTheme();
-  const { setUser, setIsSignedIn } = useContext(AuthContext);
+  const { setUser, setIsSignedIn, sendDevicePushTokenToServer } =
+    useContext(AuthContext);
+  const { expoPushToken } = useNotification();
   const { theme } = useTheme();
   const navigation = useNavigation();
   const [isDark, setIsDark] = useState(false);
@@ -98,6 +101,12 @@ const RegisterScreen = () => {
       );
       if (response.data.user) {
         setUser(response.data.user);
+        if (expoPushToken) {
+          const { user } = await sendDevicePushTokenToServer();
+          if (user) {
+            setUser(user);
+          }
+        }
         console.log(response.data);
         navigation.navigate("VerifyOTP");
         setLoading(false);

@@ -20,7 +20,7 @@ export const getFirstName = (fullName) => {
 
 export const getCategoryName = (categories = [], id = "") => {
   if (id && categories.length) {
-    return categories.filter((category) => category._id === id)[0].name;
+    return categories.filter((category) => category._id === id)[0]?.name;
   }
 };
 

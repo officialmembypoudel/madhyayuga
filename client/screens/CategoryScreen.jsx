@@ -15,7 +15,11 @@ import { useNavigation } from "@react-navigation/native";
 import { array } from "../components/CategoryComponent";
 import ScreenHeaderComponent from "../components/ScreenHeaderComponent";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAllCategories, getAllCategories } from "../store/listings";
+import {
+  fetchAllCategories,
+  fetchListingsByCategory,
+  getAllCategories,
+} from "../store/listings";
 
 const CategoryScreen = () => {
   const style = useTheme();
@@ -57,6 +61,13 @@ const CategoryScreen = () => {
               borderRadius: 10,
               elevation: 3,
               marginRight: index % 3 === 2 ? 0 : "7.33%",
+            }}
+            activeOpacity={0.7}
+            onPress={() => {
+              navigation.navigate("ListingByCategory", {
+                categoryId: category._id,
+              });
+              dispatch(fetchListingsByCategory({ categoryId: category._id }));
             }}
           >
             <CategoryCard category={category} />

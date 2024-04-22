@@ -25,7 +25,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import ScreenHeaderComponent from "../components/ScreenHeaderComponent";
 import noInternetImg from "../assets/please-login.png";
-import selectImgDum from "../assets/selectImg.png";
+import selectImgDum from "../assets/add-image.png";
 import { defaultFont } from "../fontConfig/defaultFont";
 import { databases, storage } from "../configs/appwrite";
 import { Client, ID } from "appwrite";
@@ -69,19 +69,20 @@ const AddItemScreen = () => {
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
+
       aspect: [4, 3],
       quality: 1,
+      allowsMultipleSelection: true,
+      selectionLimit: 3,
     });
 
     if (!result.canceled) {
-      setSelectedImg(result.assets[0]);
+      setSelectedImg(result.assets);
     }
   };
 
   const createListing = async () => {
     try {
-      console.log("clicked");
       setLoading(true);
       const data = new FormData();
       data.append("name", newListing.name);
@@ -89,11 +90,14 @@ const AddItemScreen = () => {
       data.append("condition", newListing.condition);
       data.append("location", newListing.location);
       data.append("with", newListing.with);
-      data.append("avatar", {
-        uri: selectedImg.uri,
-        type: mime.getType(selectedImg.uri),
-        name: selectedImg.uri.split("/").pop(),
+      selectedImg.forEach((img) => {
+        data.append("images", {
+          uri: img.uri,
+          type: mime.getType(img.uri),
+          name: img?.uri?.split("/").pop(),
+        });
       });
+
       data.append("categoryId", newListing.category._id);
 
       const response = await client.post("/listings/add", data, {
@@ -110,8 +114,9 @@ const AddItemScreen = () => {
         dispatch(userListings());
       }
     } catch (error) {
-      console.log(error.response.data);
+      console.log(error?.response?.data);
       setLoading(false);
+      console.log("Failed to add photo", error?.message);
     }
   };
 
@@ -124,7 +129,7 @@ const AddItemScreen = () => {
       }}
     >
       <ScreenHeaderComponent title="List Your Item" />
-      <Avatar
+      {/* <Avatar
         source={selectedImg ? { uri: selectedImg.uri } : selectImgDum}
         containerStyle={{
           alignSelf: "center",
@@ -143,7 +148,49 @@ const AddItemScreen = () => {
           size={30}
           onPress={pickImage}
         />
-      </Avatar>
+      </Avatar> */}
+
+      <TouchableOpacity
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-around",
+          width: "100%",
+        }}
+        onPress={pickImage}
+      >
+        {selectedImg ? (
+          selectedImg?.map((img) => (
+            <Avatar
+              key={img.uri}
+              source={{ uri: img.uri }}
+              containerStyle={{
+                alignSelf: "center",
+                height: 100,
+                width: 100,
+                marginBottom: 15,
+                borderRadius: 10,
+                backgroundColor: theme.colors.grey4,
+                padding: 2,
+              }}
+              imageProps={{ borderBottomRightRadius: 15, borderRadius: 5 }}
+            />
+          ))
+        ) : (
+          <Avatar
+            source={selectedImg ? { uri: selectedImg.uri } : selectImgDum}
+            containerStyle={{
+              alignSelf: "center",
+              height: 100,
+              width: 100,
+              marginBottom: 15,
+              // borderRadius: 10,
+              marginRight: "auto",
+            }}
+            imageProps={{ borderBottomRightRadius: 15, borderRadius: 5 }}
+          />
+        )}
+      </TouchableOpacity>
+
       <KeyboardAvoidingView
         style={{ flex: 1, width: "100%" }}
         behavior="padding"

@@ -1,5 +1,5 @@
 import { StyleSheet, View } from "react-native";
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import {
   makeStyles,
   Text,
@@ -17,16 +17,25 @@ import {
 import profileImg from "../assets/profile.png";
 import { defaultFont } from "../fontConfig/defaultFont";
 import { AuthContext } from "../context/authContext";
+import UserRating from "./UserRating";
+import { useNavigation } from "@react-navigation/native";
 
 const array = [1, 2, 3, 4, 5];
 
-const ProfileMiniCard = ({ rating }) => {
+const ProfileMiniCard = ({ rating, user, hideAccessory, hideCredit }) => {
   const style = useTheme();
   const { mode, setMode } = useThemeMode();
-  const { user } = useContext(AuthContext);
+  const navigation = useNavigation();
+
   return (
     <View>
       <Avatar
+        onPress={() =>
+          navigation.navigate("UserDetails", {
+            user: user,
+            backScreen: "Profile",
+          })
+        }
         size={"xlarge"}
         source={user?.avatar?.url ? { uri: user.avatar.url } : null}
         rounded
@@ -46,18 +55,23 @@ const ProfileMiniCard = ({ rating }) => {
           },
         }}
       >
-        <Avatar.Accessory
-          size={30}
-          color={"rgb(245, 241, 237)"}
-          iconProps={{
-            name: "edit",
-          }}
-          style={{
-            marginBottom: 15,
-            backgroundColor: style.theme.colors.primary,
-            marginRight: 2,
-          }}
-        />
+        {!hideAccessory && (
+          <Avatar.Accessory
+            size={30}
+            color={"rgb(245, 241, 237)"}
+            iconProps={{
+              name: "edit",
+            }}
+            style={{
+              marginBottom: 15,
+              backgroundColor: style.theme.colors.primary,
+              marginRight: 2,
+            }}
+            onPress={() =>
+              navigation.navigate("AddProfilePhoto", { header: true })
+            }
+          />
+        )}
       </Avatar>
       <Text
         // h4
@@ -78,44 +92,29 @@ const ProfileMiniCard = ({ rating }) => {
           marginBottom: 10,
         }}
       >
-        {array.map((count) => (
-          <Icon
-            key={count}
-            name="star"
-            size={16}
-            color={count > rating ? style.theme.colors.greyOutline : "red"}
-          />
-        ))}
+        <UserRating total={user?.totalRating} rating={user.rating} />
       </View>
 
-      <View style={{ flexDirection: "row", justifyContent: "space-evenly" }}>
-        <Chip
-          title={"Listings"}
-          color={style.theme.colors.warning}
-          type="solid"
-          radius={10}
-          icon={<Icon name="list-alt" color={style.theme.colors.disabled} />}
-          titleStyle={{
-            fontFamily: `${defaultFont}_400Regular`,
-          }}
-        />
-        <Chip
-          title={"Premium"}
-          color={style.theme.colors.error}
-          type="solid"
-          radius={10}
-          icon={
-            <Icon
-              name="award"
-              type="font-awesome-5"
-              color={"rgb(245, 241, 237)"}
-            />
-          }
-          titleStyle={{
-            fontFamily: `${defaultFont}_400Regular`,
-          }}
-        />
-      </View>
+      {!hideCredit && (
+        <View style={{ flexDirection: "row", justifyContent: "space-evenly" }}>
+          <Chip
+            title={`${user?.credit ?? 0} Credits`}
+            color={style.theme.colors.error}
+            type="solid"
+            radius={10}
+            icon={
+              <Icon
+                name="cash-outline"
+                type="ionicon"
+                color={"rgb(245, 241, 237)"}
+              />
+            }
+            titleStyle={{
+              fontFamily: `${defaultFont}_400Regular`,
+            }}
+          />
+        </View>
+      )}
     </View>
   );
 };

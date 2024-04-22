@@ -1,23 +1,32 @@
 import multer from "multer";
 import { listingsModel } from "../models/listings.js";
 import { sendMail } from "../utils/sendMail.js";
+import { userModel } from "../models/user.js";
+import mongoose from "mongoose";
 
 export const addListing = async (req, res) => {
   try {
-    if (
-      !req.body.name ||
-      !req.body.description ||
-      !req.body.condition ||
-      !req.body.with ||
-      !req.body.location ||
-      !req.body.categoryId ||
-      !req.file
-    ) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Please provide all the details!" });
+    // if (
+    //   !req.body.name ||
+    //   !req.body.description ||
+    //   !req.body.condition ||
+    //   !req.body.with ||
+    //   !req.body.location ||
+    //   !req.body.categoryId ||
+    //   !req.file
+    // ) {
+    //   return res
+    //     .status(400)
+    //     .json({ success: false, message: "Please provide all the details!" });
+    // }
+    const images = req.files;
+
+    if (!avatar) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide an image!",
+      });
     }
-    const avatar = req.file;
     let listing = await listingsModel.create({
       name: req.body.name,
       userId: req.user._id,
@@ -28,9 +37,11 @@ export const addListing = async (req, res) => {
       location: req.body.location,
       categoryId: req.body.categoryId,
     });
-    listing.images.push({
-      public_id: avatar.filename,
-      url: avatar.path,
+    listing.images = images.map((image) => {
+      return {
+        public_id: image.filename,
+        url: image.path,
+      };
     });
     listing.save();
     const listingData = {
@@ -59,10 +70,28 @@ export const addListing = async (req, res) => {
 
 export const getListings = async (req, res) => {
   try {
+    const { userId } = req.query;
+    console.log(userId);
+
+    if (userId) {
+      const listings = await listingsModel
+        .find({ userId })
+        .sort({ createdAt: -1 })
+        .populate("userId", "name email avatar phone rating totalRating");
+      const total = await listingsModel.countDocuments({ userId });
+
+      return res.status(200).json({
+        success: true,
+        message: "Fetched Listings successfully!",
+        documents: listings,
+        total,
+      });
+    }
+
     const listings = await listingsModel
       .find({})
       .sort({ createdAt: -1 })
-      .populate("userId", "name email avatar phone");
+      .populate("userId", "name email avatar phone rating totalRating");
     const total = await listingsModel.countDocuments({});
 
     res.status(200).json({
@@ -81,7 +110,7 @@ export const getMyListings = async (req, res) => {
     const listing = await listingsModel
       .find({ userId: req.user._id })
       .sort({ createdAt: -1 })
-      .populate("userId", "name email avatar phone");
+      .populate("userId", "name email avatar phone rating totalRating");
 
     if (!listing) {
       res
@@ -103,10 +132,22 @@ export const updateListing = async (req, res) => {
   // TODO add more logic for file upload
   try {
     const { listingId } = req.params;
+
+    let images = req.files;
     const listing = await listingsModel.findByIdAndUpdate(listingId, req.body, {
       new: true,
     });
 
+    if (images) {
+      images = images.map((image) => {
+        return {
+          public_id: image.filename,
+          url: image.path,
+        };
+      });
+      listing.images = images;
+      listing.save();
+    }
     res.status(201).json({
       success: true,
       message: "Updated listing successfully",
@@ -191,17 +232,52 @@ export const deleteListing = async (req, res) => {
 export const searchListings = async (req, res) => {
   try {
     const { query } = req.query;
-
     const listings = await listingsModel
       .find({
-        $text: { $search: query },
+        $text: { $search: query, $caseSensitive: false },
       })
-      .populate("userId", "name email avatar phone")
-      .populate("categoryId");
-
+      .populate("userId", "name email avatar phone rating totalRating");
+    if (listings.length === 0 || !listings) {
+      return res.status(200).json({
+        success: true,
+        message: "No listings found!",
+        documents: null,
+      });
+    }
     res.status(200).json({
       success: true,
       message: "Fetched Listings successfully!",
+      documents: listings,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getListingsByCategory = async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+    console.log(categoryId);
+    if (!categoryId) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a category id!",
+      });
+    }
+
+    const listings = await listingsModel
+      .find({ categoryId: new mongoose.Types.ObjectId(categoryId) })
+      .populate("userId", "name email avatar phone rating totalRating");
+    if (listings.length === 0 || !listings) {
+      return res.status(200).json({
+        success: true,
+        message: "No listings found!",
+        documents: null,
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Fetched Listings by category successfully!",
       documents: listings,
     });
   } catch (error) {
@@ -258,5 +334,119 @@ export const rejectUnrejectListing = async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
     console.log(error.message);
+  }
+};
+
+export const addCredit = async (req, res) => {
+  try {
+    const { listingId } = req.params;
+    const { credit, days } = req.body;
+    const user = req.user;
+
+    if (!credit || !days) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide credit and days!",
+      });
+    }
+
+    if (credit < 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Credit must be greater than 0!",
+      });
+    }
+
+    if (user.credit < credit) {
+      return res.status(400).json({
+        success: false,
+        message: "You don't have enough credit to add to this listing",
+      });
+    }
+
+    let listing = await listingsModel.findById(listingId);
+
+    if (!listing) {
+      return res.status(400).json({
+        success: false,
+        message: "Listing doesn't exist!",
+      });
+    }
+
+    if (listing.creditExpiry > new Date(Date.now())) {
+      return res.status(400).json({
+        success: false,
+        message: "You can't add credit to a listing with active credit!",
+      });
+    }
+
+    const updatedListing = await listingsModel.findByIdAndUpdate(
+      listingId,
+      {
+        credit: listing.credit + credit,
+        creditExpiry: new Date(Date.now() + days * 24 * 60 * 60 * 1000),
+      },
+      { new: true }
+    );
+    await userModel.findByIdAndUpdate(user._id, {
+      credit: user.credit - credit,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Credit added successfully",
+      document: updatedListing,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getCategoryListingCount = async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+
+    if (!categoryId) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a category id!",
+      });
+    }
+
+    const total = await listingsModel.countDocuments({
+      categoryId: new mongoose.Types.ObjectId(categoryId),
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Fetched Listings by category successfully!",
+      total,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getLocationListingCount = async (req, res) => {
+  try {
+    const { city } = req.params;
+
+    if (!city) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a city!",
+      });
+    }
+
+    console.log(city, "city ki ma kim bharosha");
+    const total = await listingsModel.countDocuments({ location: city });
+
+    return res.status(200).json({
+      success: true,
+      message: "Fetched Listings by location count successfully!",
+      total,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
   }
 };

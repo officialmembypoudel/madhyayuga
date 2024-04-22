@@ -1,5 +1,5 @@
 import { Keyboard, View } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   makeStyles,
   Text,
@@ -11,12 +11,20 @@ import {
 } from "@rneui/themed";
 import { SearchBarAndroid } from "@rneui/base/dist/SearchBar/SearchBar-android";
 import { defaultFont } from "../fontConfig/defaultFont";
+import { useDispatch } from "react-redux";
+import { fetchSearchListings } from "../store/listings";
 
 const SearchBarComponent = () => {
   const theme = useTheme();
   const { mode } = useThemeMode();
   const [query, setQuery] = useState("");
+  const dispatch = useDispatch();
   // console.log(query);
+
+  useEffect(() => {
+    dispatch(fetchSearchListings({ query }));
+  }, [query]);
+
   return (
     <View>
       <SearchBarAndroid

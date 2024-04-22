@@ -22,7 +22,9 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAllListings,
   fetchLocations,
+  fetchSearchListings,
   getAllListings,
+  getSearchedListing,
   updateViews,
 } from "../store/listings";
 import { useNavigation } from "@react-navigation/native";
@@ -68,6 +70,8 @@ const HomeComponent = () => {
   const [isDark, setIsDark] = useState(false);
   const allListings = useSelector(getAllListings);
 
+  const searchedListing = useSelector(getSearchedListing);
+
   const sections = [
     {
       title: "hot",
@@ -84,10 +88,11 @@ const HomeComponent = () => {
   const navigateToNewListings = () => navigate("NewListing");
 
   useEffect(() => {
-    dispatch(fetchAllListings({ limit: 5 }));
+    dispatch(fetchAllListings());
     dispatch(fetchLocations());
   }, [dispatch]);
   // console.log(allListings);
+
   const handleOnPress = (state) => {
     setIsDark(state);
     setMode(state ? "dark" : "light");
@@ -150,7 +155,24 @@ const HomeComponent = () => {
       </TouchableOpacity>
       <SearchBarComponent />
 
-      {allListings && (
+      {searchedListing?.length > 0 ? (
+        <>
+          <CategoryComponent />
+          <FlatList
+            style={{
+              width: "100%",
+            }}
+            contentContainerStyle={{ paddingBottom: 5 }}
+            showsVerticalScrollIndicator={false}
+            overScrollMode="never"
+            data={searchedListing}
+            keyExtractor={(item) => item._id}
+            renderItem={({ item }) => (
+              <ItemComponent type="column" item={{ ...item, from: "home" }} />
+            )}
+          />
+        </>
+      ) : allListings ? (
         <>
           <CategoryComponent />
           <FlatList
@@ -205,7 +227,7 @@ const HomeComponent = () => {
             )}
           />
         </>
-      )}
+      ) : null}
     </View>
   );
 };

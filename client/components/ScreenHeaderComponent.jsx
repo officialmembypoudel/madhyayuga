@@ -48,7 +48,7 @@ const ScreenHeaderComponent = ({
           // marginBottom: 20,
         }}
       >
-        <Icon name="md-chevron-back" type="ionicon" size={25} />
+        <Icon name="chevron-back-outline" type="ionicon" size={25} />
         <Text
           h4
           h4Style={{
