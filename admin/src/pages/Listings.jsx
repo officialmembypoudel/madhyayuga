@@ -286,14 +286,14 @@ const Listings = () => {
               <Typography variant="h4">All Listings</Typography>
             </Box>
           </Grid>
-          <Grid item sm={12} md={3}>
+          <Grid item sm={12} md={4}>
             <TextField
               label="Search"
               placeholder="search for listing"
               fullWidth
             />
           </Grid>
-          <Grid item sm={12} md={3}>
+          <Grid item sm={12} md={4}>
             <FormControl fullWidth>
               <InputLabel id="category">Category</InputLabel>
               <Select
@@ -311,7 +311,7 @@ const Listings = () => {
             </FormControl>
           </Grid>
 
-          <Grid item sm={12} md={2}>
+          {/* <Grid item sm={12} md={2}>
             <Button
               disableElevation
               variant="contained"
@@ -322,7 +322,7 @@ const Listings = () => {
             >
               Add Listing
             </Button>
-          </Grid>
+          </Grid> */}
         </Grid>
       </Card>
 

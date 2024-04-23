@@ -21,6 +21,7 @@ export const sendToken = (res, user, statusCode, message) => {
     isAdmin: user.isAdmin,
     suspended: user.suspended,
     expoPushToken: user.expoPushToken,
+    location: user.location,
   };
 
   res

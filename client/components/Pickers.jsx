@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Divider, Icon, Overlay, Text, useTheme } from "@rneui/themed";
-import { Modal, TouchableOpacity, View } from "react-native";
+import { Modal, ScrollView, TouchableOpacity, View } from "react-native";
 import { defaultFont } from "../fontConfig/defaultFont";
 import { containerStyles } from "../helpers/objects";
 import ScreenHeaderComponent from "./ScreenHeaderComponent";
@@ -237,27 +237,38 @@ export const LocationPicker = ({ items, onChange, value }) => {
                 // gap: "9%",
               }}
             >
-              {items.map((location, index) => (
-                <View
-                  key={location._id}
-                  style={{ width: "100%", marginBottom: 20 }}
-                >
-                  <TouchableOpacity
+              <ScrollView style={{ width: "100%" }}>
+                {items.map((location, index) => (
+                  <View
                     key={location._id}
-                    style={{
-                      backgroundColor: "rgba(0,0,0,0)",
-                      marginBottom: 10,
-                      borderRadius: 10,
-                      elevation: 3,
-                      width: "100%",
-                    }}
-                    onPress={() => handleSelect(location)}
+                    style={{ width: "100%", marginBottom: 20 }}
                   >
-                    <Text>{location.city}</Text>
-                  </TouchableOpacity>
-                  <Divider />
-                </View>
-              ))}
+                    <TouchableOpacity
+                      key={location._id}
+                      style={{
+                        backgroundColor: "rgba(0,0,0,0)",
+                        marginBottom: 10,
+                        borderRadius: 10,
+                        elevation: 3,
+                        width: "100%",
+                        padding: 10,
+                      }}
+                      onPress={() => handleSelect(location)}
+                    >
+                      <Text
+                        style={{
+                          fontFamily: `${defaultFont}_400Regular`,
+                          fontSize: 18,
+                          color: theme.colors.black,
+                        }}
+                      >
+                        {location.city}
+                      </Text>
+                    </TouchableOpacity>
+                    <Divider />
+                  </View>
+                ))}
+              </ScrollView>
             </View>
           </View>
         </Modal>

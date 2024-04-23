@@ -12,9 +12,9 @@ import {
 import { SearchBarAndroid } from "@rneui/base/dist/SearchBar/SearchBar-android";
 import { defaultFont } from "../fontConfig/defaultFont";
 import { useDispatch } from "react-redux";
-import { fetchSearchListings } from "../store/listings";
+import { emptySearches, fetchSearchListings } from "../store/listings";
 
-const SearchBarComponent = () => {
+const SearchBarComponent = ({ location }) => {
   const theme = useTheme();
   const { mode } = useThemeMode();
   const [query, setQuery] = useState("");
@@ -22,8 +22,17 @@ const SearchBarComponent = () => {
   // console.log(query);
 
   useEffect(() => {
-    dispatch(fetchSearchListings({ query }));
-  }, [query]);
+    if (query || location !== "Nepal") {
+      dispatch(fetchSearchListings({ query, location }));
+    }
+  }, [query, location]);
+
+  useEffect(() => {
+    if (!query && location === "Nepal") {
+      dispatch({ type: "listings/emptySearches" });
+      console.log("emptying searches");
+    }
+  }, [query, location]);
 
   return (
     <View>

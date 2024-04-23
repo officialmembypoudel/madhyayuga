@@ -27,11 +27,16 @@ import { defaultFont } from "../fontConfig/defaultFont";
 import { databases, storage } from "../configs/appwrite";
 import { ID } from "appwrite";
 import { AuthContext } from "../context/authContext";
-import { useDispatch } from "react-redux";
-import { fetchAllListings, userListings } from "../store/listings";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchAllListings,
+  getLocations,
+  userListings,
+} from "../store/listings";
 import { client } from "../configs/axios";
 
 import mime from "mime";
+import { LocationPicker } from "../components/Pickers";
 
 const defaultInputs = {
   name: "",
@@ -53,6 +58,7 @@ const EditListingScreen = ({ route }) => {
   const { mode, setMode } = useThemeMode();
   const [newListing, setNewListing] = useState({});
   const [loading, setLoading] = useState(false);
+  const locations = useSelector(getLocations);
 
   useEffect(() => {
     setNewListing({ ...item });
@@ -342,7 +348,14 @@ const EditListingScreen = ({ route }) => {
           >
             Location
           </Text>
-          <Input
+          <LocationPicker
+            items={locations}
+            onChange={(value) =>
+              setNewListing({ ...newListing, location: value })
+            }
+            value={newListing.location}
+          />
+          {/* <Input
             value={newListing.location}
             onChangeText={(location) =>
               setNewListing({ ...newListing, location: location })
@@ -361,7 +374,7 @@ const EditListingScreen = ({ route }) => {
             // keyboardType="email-address"
             containerStyle={{ paddingHorizontal: 0 }}
             inputStyle={{ fontFamily: `${defaultFont}_400Regular` }}
-          />
+          /> */}
         </View>
         <Button
           loading={loading}
@@ -374,7 +387,7 @@ const EditListingScreen = ({ route }) => {
           )}
           title="Update Listing"
           color="success"
-          buttonStyle={{ paddingVertical: 12, borderRadius: 5 }}
+          buttonStyle={{ paddingVertical: 12, borderRadius: 5, marginTop: 25 }}
           onPress={updateListing}
         />
       </ScrollView>

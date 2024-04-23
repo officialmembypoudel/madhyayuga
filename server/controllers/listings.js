@@ -87,11 +87,18 @@ export const getListings = async (req, res) => {
         total,
       });
     }
-
-    const listings = await listingsModel
-      .find({})
-      .sort({ createdAt: -1 })
-      .populate("userId", "name email avatar phone rating totalRating");
+    let listings;
+    if (req?.user?.isAdmin) {
+      listings = await listingsModel
+        .find({})
+        .sort({ createdAt: -1 })
+        .populate("userId", "name email avatar phone rating totalRating");
+    } else {
+      listings = await listingsModel
+        .find({ rejected: false })
+        .sort({ credit: -1 })
+        .populate("userId", "name email avatar phone rating totalRating");
+    }
     const total = await listingsModel.countDocuments({});
 
     res.status(200).json({
@@ -231,19 +238,29 @@ export const deleteListing = async (req, res) => {
 
 export const searchListings = async (req, res) => {
   try {
-    const { query } = req.query;
-    const listings = await listingsModel
-      .find({
-        $text: { $search: query, $caseSensitive: false },
-      })
-      .populate("userId", "name email avatar phone rating totalRating");
-    if (listings.length === 0 || !listings) {
-      return res.status(200).json({
-        success: true,
-        message: "No listings found!",
-        documents: null,
-      });
+    const { query, city } = req.query;
+    let listings;
+    if ((city === "Nepal" || !city) && query) {
+      listings = await listingsModel
+        .find({
+          $text: { $search: query, $caseSensitive: false },
+        })
+        .populate("userId", "name email avatar phone rating totalRating");
+    } else if (!query && city) {
+      listings = await listingsModel
+        .find({
+          location: city,
+        })
+        .populate("userId", "name email avatar phone rating totalRating");
+    } else {
+      listings = await listingsModel
+        .find({
+          $text: { $search: query, $caseSensitive: false },
+          location: city,
+        })
+        .populate("userId", "name email avatar phone rating totalRating");
     }
+
     res.status(200).json({
       success: true,
       message: "Fetched Listings successfully!",

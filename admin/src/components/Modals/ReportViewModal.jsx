@@ -20,8 +20,14 @@ import React, { useEffect, useState } from "react";
 
 const ReportViewModal = ({ open, setOpen, value }) => {
   const [report, setReport] = useState(value);
-  const { updateReports, fetchReportMessages, reportMessages, updateLoading } =
-    useStore();
+  const {
+    updateReports,
+    fetchReportMessages,
+    reportMessages,
+    updateLoading,
+    suspendUser,
+    rejectListings,
+  } = useStore();
 
   useEffect(() => {
     setReport(value);
@@ -48,7 +54,7 @@ const ReportViewModal = ({ open, setOpen, value }) => {
           xs: "start",
           sm: "start",
           md: "start",
-          lg: "center",
+          lg: "start",
           xl: "center",
         },
         justifyContent: "center",
@@ -111,6 +117,39 @@ const ReportViewModal = ({ open, setOpen, value }) => {
               <Typography variant="body1">
                 <strong>Status:</strong> {capitalizeFirstLetter(report?.status)}
               </Typography>
+              {report?.type?.toLowerCase() === "listing" ? (
+                <Box sx={{ mt: 2 }}>
+                  <Button
+                    onClick={() =>
+                      rejectListings(
+                        report?.listing?._id,
+                        "Because you were reported",
+                        () => {}
+                      )
+                    }
+                    variant="contained"
+                    color="error"
+                  >
+                    Reject Listing
+                  </Button>
+                </Box>
+              ) : (
+                <Box sx={{ mt: 2 }}>
+                  <Button
+                    onClick={() =>
+                      suspendUser(
+                        report?.reportedUser?._id,
+                        "Because You were reported",
+                        () => {}
+                      )
+                    }
+                    variant="contained"
+                    color="error"
+                  >
+                    Suspend User
+                  </Button>
+                </Box>
+              )}
             </Box>
           </Grid>
           <Grid item xs={12} sm={12} md={5} sx={{}}>

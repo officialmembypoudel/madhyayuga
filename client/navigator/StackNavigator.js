@@ -9,6 +9,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { AuthContext } from "../context/authContext";
 import VerifyOTP from "../screens/VerifyOTP";
 import AddProfilePhoto from "../screens/AddProfilePhoto";
+import ConfirmEmail from "../screens/ConfirmEmail";
+import ResetPasswordScreen from "../screens/ResetPasswordScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +27,8 @@ const UnAuthStack = () => {
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="VerifyOTP" component={VerifyOTP} />
         <Stack.Screen name="AddProfilePhoto" component={AddProfilePhoto} />
+        <Stack.Screen name="ConfirmEmail" component={ConfirmEmail} />
+        <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
       </Stack.Group>
 
       {/* <Stack.Group>

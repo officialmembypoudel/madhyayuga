@@ -41,6 +41,8 @@ import { ChatContext } from "../context/chatContext";
 import ItemDetailsTab from "../components/ItemDetailsTab";
 import StyledCard from "../components/StyledCard";
 import UserRating from "../components/UserRating";
+import GoogleQuery from "../components/GoogleQuery";
+import { AuthContext } from "../context/authContext";
 
 export const CommentComponent = ({ comment, replyTo, setReplyTo }) => {
   const { mode } = useThemeMode();
@@ -456,18 +458,75 @@ export const NormalDataTextComponent = ({
   );
 };
 
+const CTA = ({ item }) => {
+  const { user } = useContext(AuthContext);
+  const { createChatRoom } = useContext(ChatContext);
+  const screenWidth = Dimensions.get("window").width;
+  return (
+    <>
+      {user?._id !== item?.userId?._id ? (
+        <View
+          style={{
+            backgroundColor: "rgba(246, 241, 232,0.6)",
+
+            position: "absolute",
+            height: 60,
+            width: screenWidth,
+            //   backgroundColor: "red",
+            bottom: 0,
+            left: 0,
+            flexDirection: "row",
+            //   justifyContent: "space-between",
+            flex: 1,
+          }}
+        >
+          <TouchableOpacity
+            style={[
+              styles.buttons,
+              { backgroundColor: "rgba(126, 188, 137,0.0)" },
+            ]}
+          >
+            <Icon name="call-outline" type="ionicon" />
+
+            <NormalDataTextComponent text="Call" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.buttons,
+              { backgroundColor: "rgba(254, 93, 38,0.0)" },
+            ]}
+          >
+            <Icon name="mail-outline" type="ionicon" />
+
+            <NormalDataTextComponent text="Email" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.buttons, { backgroundColor: "rgba(7, 94, 84,0.0)" }]}
+            onPress={() => {
+              createChatRoom(item?._id, item?.userId?._id);
+            }}
+          >
+            <Icon name="chatbox-outline" type="ionicon" />
+            <NormalDataTextComponent text="Chat" />
+          </TouchableOpacity>
+        </View>
+      ) : null}
+    </>
+  );
+};
+
 const ItemDisplayScreen = ({ route }) => {
   const dispatch = useDispatch();
   const style = useTheme();
   const navigation = useNavigation();
-  const { createChatRoom } = useContext(ChatContext);
+
   const [isDark, setIsDark] = useState(false);
   const { mode, setMode } = useThemeMode();
   const { item } = route.params;
-  const screenWidth = Dimensions.get("window").width;
   const [newItem, setNewItem] = useState({ ...item });
   const [user, setUser] = useState({});
   const [favorite, setFavorite] = useState(false);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     setUser(item?.userId);
@@ -686,8 +745,13 @@ const ItemDisplayScreen = ({ route }) => {
                     type="clear"
                     radius={30}
                     onPress={() => {
-                      console.log("google search");
+                      setVisible(true);
                     }}
+                  />
+                  <GoogleQuery
+                    visible={visible}
+                    setVisible={setVisible}
+                    query={item?.with}
                   />
                 </View>
                 <NormalDataTextComponent
@@ -801,58 +865,11 @@ const ItemDisplayScreen = ({ route }) => {
             {/* <ItemDetailsTabOne item={item} /> */}
             {/* </StyledCard> */}
           </ScrollView>
-          <View
-            style={{
-              backgroundColor: "rgba(246, 241, 232,0.6)",
-
-              position: "absolute",
-              height: 60,
-              width: screenWidth,
-              //   backgroundColor: "red",
-              bottom: 0,
-              left: 0,
-              flexDirection: "row",
-              //   justifyContent: "space-between",
-              flex: 1,
-            }}
-          >
-            <TouchableOpacity
-              style={[
-                styles.buttons,
-                { backgroundColor: "rgba(126, 188, 137,0.0)" },
-              ]}
-            >
-              <Icon name="call-outline" type="ionicon" />
-
-              <NormalDataTextComponent text="Call" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.buttons,
-                { backgroundColor: "rgba(254, 93, 38,0.0)" },
-              ]}
-            >
-              <Icon name="mail-outline" type="ionicon" />
-
-              <NormalDataTextComponent text="Email" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.buttons,
-                { backgroundColor: "rgba(7, 94, 84,0.0)" },
-              ]}
-              onPress={() => {
-                createChatRoom(item?._id, item?.userId?._id);
-              }}
-            >
-              <Icon name="chatbox-outline" type="ionicon" />
-              <NormalDataTextComponent text="Chat" />
-            </TouchableOpacity>
-          </View>
         </View>
       ) : (
         <Text>Item not found</Text>
       )}
+      <CTA item={item} />
     </>
   );
 };

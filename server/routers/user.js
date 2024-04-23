@@ -8,6 +8,7 @@ import {
   fetchMyReviews,
   fetchToReview,
   fetchUserReviews,
+  forgotPassword,
   getMyProfile,
   getNotifications,
   getUserByID,
@@ -15,7 +16,9 @@ import {
   login,
   logout,
   register,
+  resendForgotPasswordOTP,
   resendOTP,
+  resetPassword,
   reviewUser,
   sendNotification,
   suspendUnsuspendUser,
@@ -31,12 +34,17 @@ router.route("/register").post(register);
 
 router
   .route("/verify")
+  .patch(resendForgotPasswordOTP)
   .get(isAuthenticated, resendOTP)
   .post(isAuthenticated, verifyUser);
 
 router
   .route("/register/photo")
   .post(isAuthenticated, upload.single("avatar"), addProfilePhoto);
+
+router.route("/forgot-password").post(forgotPassword);
+
+router.route("/reset-password").post(resetPassword);
 
 router.route("/login").post(login);
 

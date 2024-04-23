@@ -207,6 +207,12 @@ const LoginScreen = () => {
             )}
             name="password"
           />
+          <Button
+            type="clear"
+            buttonStyle={{ padding: 0, marginBottom: 5, alignSelf: "flex-end" }}
+            title={"Forgot Password"}
+            onPress={() => navigation.navigate("ConfirmEmail")}
+          />
           {loginMessage ? (
             <Text
               style={{

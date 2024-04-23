@@ -33,7 +33,7 @@ import {
 
 const router = express.Router();
 
-router.route("/listings").get(getListings);
+router.route("/listings").get(isAuthenticated, getListings);
 router.route("/listings/search").get(searchListings);
 router.route("/listings/search/:categoryId").get(getListingsByCategory);
 router

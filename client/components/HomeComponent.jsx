@@ -30,6 +30,8 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { getFirstName } from "../helpers/functions";
 import { ScrollView } from "react-native-virtualized-view";
+import { LocationPicker } from "./Pickers";
+import HomeLocationPicker from "./HomeLocationPicker";
 
 const SectionTitle = ({ title, onPress }) => {
   const style = useTheme();
@@ -69,6 +71,8 @@ const HomeComponent = () => {
   const { setMode, mode } = useThemeMode();
   const [isDark, setIsDark] = useState(false);
   const allListings = useSelector(getAllListings);
+  const [visible, setVisible] = useState(false);
+  const [location, setLocation] = useState("Nepal");
 
   const searchedListing = useSelector(getSearchedListing);
 
@@ -142,6 +146,9 @@ const HomeComponent = () => {
           marginTop: 5,
           alignSelf: "flex-end",
         }}
+        onPress={() => {
+          setVisible(true);
+        }}
       >
         <Icon
           name="location-outline"
@@ -150,12 +157,17 @@ const HomeComponent = () => {
           size={15}
         />
         <Text style={{ fontFamily: `${defaultFont}_300Light` }}>
-          Itahari, Sunsari
+          {location}
         </Text>
       </TouchableOpacity>
-      <SearchBarComponent />
+      <HomeLocationPicker
+        visible={visible}
+        setVisible={setVisible}
+        onChange={(value) => setLocation(value)}
+      />
+      <SearchBarComponent location={location} />
 
-      {searchedListing?.length > 0 ? (
+      {searchedListing?.documents?.length > 0 ? (
         <>
           <CategoryComponent />
           <FlatList
@@ -165,13 +177,25 @@ const HomeComponent = () => {
             contentContainerStyle={{ paddingBottom: 5 }}
             showsVerticalScrollIndicator={false}
             overScrollMode="never"
-            data={searchedListing}
+            data={searchedListing?.documents}
             keyExtractor={(item) => item._id}
             renderItem={({ item }) => (
               <ItemComponent type="column" item={{ ...item, from: "home" }} />
             )}
           />
         </>
+      ) : Array.isArray(searchedListing?.documents) ? (
+        <Text
+          style={{
+            fontFamily: `${defaultFont}_500Medium`,
+            fontSize: 20,
+            width: "100%",
+            textAlign: "center",
+            marginTop: 30,
+          }}
+        >
+          X{"       "} No search Results{" "}
+        </Text>
       ) : allListings ? (
         <>
           <CategoryComponent />

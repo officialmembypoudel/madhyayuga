@@ -175,6 +175,11 @@ export const login = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Invalid Email or Password" });
     }
+    if (user.suspended) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Your account has been suspended" });
+    }
     const passwordMatched = await user.comparePassword(password);
 
     if (!passwordMatched) {
@@ -184,6 +189,172 @@ export const login = async (req, res) => {
     }
 
     sendToken(res, user, 200, "You have been logged in.");
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await userModel.findOne({ email: email.toLowerCase() });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User not found with this email" });
+    }
+
+    if (user.suspended) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Your account has been suspended" });
+    }
+
+    const otp = Math.floor(Math.random() * 1000000);
+    user.otp = otp;
+    user.opt_expiry = new Date(Date.now() + process.env.OTP_EXPIRY * 60 * 1000);
+    await user.save();
+
+    sendMail(
+      user.email,
+      "Madhyayuga Password Reset",
+      `
+    Dear ${user.name},
+    
+    You have requested a password reset for your account on Madhyayuga.
+    
+
+
+
+
+    Your OTP is ${otp}
+    
+
+
+
+    Note: If you didnot request this, please ignore this email.
+
+
+    Regards,
+    Team Madhyayuga
+    madhyayuga@gmail.com`
+    );
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "OTP sent to your email please verify your account",
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const resendForgotPasswordOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await userModel.findOne({ email: email.toLowerCase() });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User not found with this email" });
+    }
+    const otp = Math.floor(Math.random() * 1000000);
+    user.otp = otp;
+    user.opt_expiry = new Date(Date.now() + process.env.OTP_EXPIRY * 60 * 1000);
+    await user.save();
+
+    sendMail(
+      user.email,
+      "Madhyayuga Password Reset",
+      `
+    Dear ${user.name},
+    
+    You have requested a password reset for your account on Madhyayuga.
+    
+    Your OTP is ${otp}
+    
+    Regards,
+    Team Madhyayuga
+    madhyayuga@gmail.com`
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent to your email for resetting your account",
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, otp, password, confirmPassword } = req.body;
+
+    if (!email || !otp || !password || !confirmPassword) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Please provide all fields" });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters",
+      });
+    }
+
+    if (password !== confirmPassword) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Passwords do not match" });
+    }
+
+    let user = await userModel.findOne({ email: email.toLowerCase() });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User not found" });
+    }
+    if (user.suspended) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Your account has been suspended" });
+    }
+
+    if (user.otp !== otp || user.opt_expiry < Date.now()) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid OTP or otp expired" });
+    }
+
+    user.password = password;
+    user.otp = null;
+    user.opt_expiry = null;
+
+    await user.save();
+
+    sendMail(
+      user.email,
+      "Madhyayuga Password Reset",
+      `
+    Dear ${user.name},
+
+    Your password has been reset successfully.
+
+    Regards,
+    Team Madhyayuga
+    madhyayuga@gmail.com`
+    );
+
+    sendToken(res, user, 200, "Password reset successful.");
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -203,9 +374,7 @@ export const logout = async (req, res) => {
   try {
     res
       .status(200)
-      .cookie("token", null, {
-        expires: new Date(Date.now()),
-      })
+      .cookie("token", null)
       .json({ success: true, message: "You have been logged out." });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

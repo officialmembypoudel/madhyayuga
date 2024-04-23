@@ -66,6 +66,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  // location: {
+  //   type: String,
+  //   default: "Nepal",
+  // },
 });
 
 userSchema.pre("save", async function (next) {

@@ -5,15 +5,15 @@ import {
   getLocations,
   updateLocation,
 } from "../controllers/location.js";
-import { isAuthenticated } from "../middleware/auth.js";
+import { isAdmin, isAuthenticated } from "../middleware/auth.js";
 
 const router = express.Router();
 
 router.route("/locations").get(getLocations);
-router.route("/locations/add").post(isAuthenticated, addLocation);
+router.route("/locations/add").post(isAuthenticated, isAdmin, addLocation);
 router
   .route("/locations/update/:locationId")
-  .put(isAuthenticated, updateLocation)
-  .delete(isAuthenticated, deleteLocation);
+  .put(isAuthenticated, isAdmin, updateLocation)
+  .delete(isAuthenticated, isAdmin, deleteLocation);
 
 export default router;

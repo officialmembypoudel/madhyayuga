@@ -40,9 +40,9 @@ export const fetchSearchListings = createAsyncThunk(
     try {
       // Fetch listings from the server
       const response = await client.get(
-        "/listings/search?query=" + params?.query
+        "/listings/search?query=" + params?.query + "&city=" + params?.location
       );
-      return response.data.documents;
+      return response.data;
     } catch (error) {
       // Log and rethrow the error to propagate it
       console.error("listings fetch error", error.response.data);
@@ -210,14 +210,18 @@ const initialState = {
   bids: [],
   locations: [],
   favourites: [],
-  searched: [],
+  searched: null,
 };
 
 // Redux Toolkit slice for managing listings state
 const listings = createSlice({
   name: "listings",
   initialState,
-  reducers: {},
+  reducers: {
+    emptySearches: (state) => {
+      state.searched = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
       // Reducer cases for fetchAllCategories
@@ -320,3 +324,5 @@ export const getUserListings = (state) => state.listings.userListings;
 export const getBids = (state) => state.listings.bids;
 export const getLocations = (state) => state.listings.locations;
 export const getFavourites = (state) => state.listings.favourites;
+
+export const { emptySearches } = listings.actions;

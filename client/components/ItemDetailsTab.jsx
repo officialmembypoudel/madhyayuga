@@ -7,7 +7,7 @@ import {
   useTheme,
   useThemeMode,
 } from "@rneui/themed";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   FlatList,
   ScrollView,
@@ -33,6 +33,7 @@ import { useScrollToTop } from "@react-navigation/native";
 import BidItemsCard from "./BidItemsCard";
 import SelectBidModal from "./SelectBidModal";
 import { fetchBids, getBids } from "../store/listings";
+import { AuthContext } from "../context/authContext";
 
 const SecondRoute = ({ route }) => {
   const { theme } = useTheme();
@@ -167,6 +168,7 @@ const ThirdRoute = ({ route: { item } }) => {
   const dispatch = useDispatch();
   const [visible, setVisible] = useState(false);
   const allBids = useSelector(getBids);
+  const { user } = useContext(AuthContext);
 
   const handleBidModal = () => setVisible(!visible);
 
@@ -193,18 +195,20 @@ const ThirdRoute = ({ route: { item } }) => {
         />
       )}
 
-      <Button
-        title={"Add"}
-        containerStyle={{ marginBottom: 10, alignSelf: "flex-end" }}
-        buttonStyle={{
-          backgroundColor: theme.colors.grey4,
-          borderRadius: 10,
-          elevation: 0,
-        }}
-        onPress={handleBidModal}
-      >
-        <Icon name="add" />
-      </Button>
+      {item?.userId?._id !== user?._id && (
+        <Button
+          title={"Add"}
+          containerStyle={{ marginBottom: 10, alignSelf: "flex-end" }}
+          buttonStyle={{
+            backgroundColor: theme.colors.grey4,
+            borderRadius: 10,
+            elevation: 0,
+          }}
+          onPress={handleBidModal}
+        >
+          <Icon name="add" />
+        </Button>
+      )}
       <SelectBidModal
         item={item}
         visible={visible}

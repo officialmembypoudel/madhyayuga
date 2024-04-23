@@ -52,14 +52,15 @@ export default function ItemComponent({ type, item, zindex, onPress }) {
           margin: 0,
           marginBottom: 0,
           padding: 10,
-          backgroundColor:
-            item?.creditExpiry > new Date(Date.now()).toISOString()
-              ? mode === "dark"
-                ? "rgba(253, 227, 127, 0.4)" // Gold color with 20% opacity for future credit expiry in dark mode
-                : "rgba(253, 227, 127, 0.7)" // Gold color with full opacity for future credit expiry in light mode
-              : mode === "dark"
-              ? theme.colors.grey4 // Dark background, keep text color grey
-              : theme.colors.background,
+          backgroundColor: item?.rejected
+            ? "rgba(255, 0, 0, 0.4)" // Red color with 40% opacity for rejected items
+            : item?.creditExpiry > new Date(Date.now()).toISOString()
+            ? mode === "dark"
+              ? "rgba(253, 227, 127, 0.4)" // Gold color with 20% opacity for future credit expiry in dark mode
+              : "rgba(253, 227, 127, 0.7)" // Gold color with full opacity for future credit expiry in light mode
+            : mode === "dark"
+            ? theme.colors.grey4 // Dark background, keep text color grey
+            : theme.colors.background,
 
           borderWidth: 0,
           borderRadius: 10,

@@ -21,12 +21,18 @@ const StoreProvider = ({ children }) => {
   const fetchListings = async () => {
     try {
       setLoading(true);
-      const res = await client.get("/listings");
+      const res = await client.get("/listings", {
+        headers: {
+          Authorization: `Bearer ${getCookie("token")}`,
+        },
+      });
       setListings(res.data);
       res.data && setLoading(false);
+      console.warn(res.data);
     } catch (error) {
       setLoading(false);
       setError(error?.response?.data?.message);
+      console.warn(error.message);
     }
   };
 

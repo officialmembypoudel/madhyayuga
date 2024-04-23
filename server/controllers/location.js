@@ -29,7 +29,9 @@ export const addLocation = async (req, res) => {
 
 export const getLocations = async (req, res) => {
   try {
-    const locations = await locationModel.find();
+    const locations = await locationModel
+      .find({ city: { $ne: "Nepal" } })
+      .sort({ city: 1 });
     res.status(200).json({
       success: true,
       documents: locations,
@@ -46,6 +48,11 @@ export const updateLocation = async (req, res) => {
       return res
         .status(400)
         .json({ success: false, message: "Please provide location id!" });
+    }
+    if (req.body.city === "Nepal") {
+      return res
+        .status(400)
+        .json({ success: false, message: "Cannot update Nepal!" });
     }
     const location = await locationModel.findById(req.params.locationId);
     if (!location) {
@@ -73,6 +80,11 @@ export const deleteLocation = async (req, res) => {
       return res
         .status(400)
         .json({ success: false, message: "Please provide location id!" });
+    }
+    if (req.body.city === "Nepal") {
+      return res
+        .status(400)
+        .json({ success: false, message: "Cannot delete Nepal!" });
     }
     const location = await locationModel.findById(req.params.locationId);
     if (!location) {
