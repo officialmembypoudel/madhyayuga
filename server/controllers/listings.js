@@ -6,22 +6,22 @@ import mongoose from "mongoose";
 
 export const addListing = async (req, res) => {
   try {
-    // if (
-    //   !req.body.name ||
-    //   !req.body.description ||
-    //   !req.body.condition ||
-    //   !req.body.with ||
-    //   !req.body.location ||
-    //   !req.body.categoryId ||
-    //   !req.file
-    // ) {
-    //   return res
-    //     .status(400)
-    //     .json({ success: false, message: "Please provide all the details!" });
-    // }
+    if (
+      !req.body.name ||
+      !req.body.description ||
+      !req.body.condition ||
+      !req.body.with ||
+      !req.body.location ||
+      !req.body.categoryId ||
+      !req.files
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Please provide all the details!" });
+    }
     const images = req.files;
 
-    if (!avatar) {
+    if (!images) {
       return res.status(400).json({
         success: false,
         message: "Please provide an image!",
@@ -96,7 +96,7 @@ export const getListings = async (req, res) => {
     } else {
       listings = await listingsModel
         .find({ rejected: false })
-        .sort({ credit: -1 })
+        .sort({ credit: -1, createdAt: -1 })
         .populate("userId", "name email avatar phone rating totalRating");
     }
     const total = await listingsModel.countDocuments({});

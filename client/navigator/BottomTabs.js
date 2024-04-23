@@ -107,7 +107,7 @@ export default function BottomTabs() {
         name="Chat"
         component={ChatsScreen}
         options={{
-          tabBarBadge: 3,
+          // tabBarBadge: 3,
           tabBarBadgeStyle: {
             backgroundColor: style.theme.colors.warning,
             color: style.theme.colors.background,

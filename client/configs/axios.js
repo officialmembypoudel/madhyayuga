@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // // for general purpose and for ios emulator
-export let serverAddress = "http://localhost:4000";
+// export let serverAddress = "http://localhost:4000";
 
 // export const client = axios.create({
 //   baseURL: "http://localhost:4000/api/v1",
@@ -9,7 +9,7 @@ export let serverAddress = "http://localhost:4000";
 
 // while at home
 // export let serverAddress = "http://192.168.160.208:4000";
-// export let serverAddress = "http://192.168.18.147:4000";
+export let serverAddress = "http://192.168.18.147:4000";
 export const client = axios.create({
   baseURL: serverAddress + "/api/v1",
 });

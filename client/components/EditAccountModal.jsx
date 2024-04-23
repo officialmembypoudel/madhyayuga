@@ -195,7 +195,7 @@ const EditAccountModal = ({ open, setOpen }) => {
                       backgroundColor: theme.colors.grey4,
                     }}
                     placeholder="name, e.g.: John Doe"
-                    keyboardType="email-address"
+                    // keyboardType="email-address"
                     containerStyle={{ paddingHorizontal: 0, marginBottom: 5 }}
                     inputStyle={{ fontFamily: `${defaultFont}_400Regular` }}
                     autoCapitalize="none"
@@ -237,7 +237,7 @@ const EditAccountModal = ({ open, setOpen }) => {
                       backgroundColor: theme.colors.grey4,
                     }}
                     placeholder="phone, e.g.: 9800000000"
-                    keyboardType="email-address"
+                    keyboardType="phone-pad"
                     containerStyle={{ paddingHorizontal: 0, marginBottom: 5 }}
                     inputStyle={{ fontFamily: `${defaultFont}_400Regular` }}
                     autoCapitalize="none"
@@ -280,12 +280,13 @@ const EditAccountModal = ({ open, setOpen }) => {
                       backgroundColor: theme.colors.grey4,
                     }}
                     placeholder="your old password"
-                    keyboardType="email-address"
+                    // keyboardType="
                     containerStyle={{ paddingHorizontal: 0, marginBottom: 5 }}
                     inputStyle={{ fontFamily: `${defaultFont}_400Regular` }}
                     autoCapitalize="none"
                     errorMessage={errors.oldPassword?.message}
                     errorStyle={{ fontFamily: `${defaultFont}_400Regular` }}
+                    secureTextEntry={true}
                   />
                 )}
                 name="oldPassword"
@@ -323,12 +324,13 @@ const EditAccountModal = ({ open, setOpen }) => {
                       backgroundColor: theme.colors.grey4,
                     }}
                     placeholder="your new password"
-                    keyboardType="email-address"
+                    // keyboardType="email-address"
                     containerStyle={{ paddingHorizontal: 0, marginBottom: 5 }}
                     inputStyle={{ fontFamily: `${defaultFont}_400Regular` }}
                     autoCapitalize="none"
                     errorMessage={errors.newPassword?.message}
                     errorStyle={{ fontFamily: `${defaultFont}_400Regular` }}
+                    secureTextEntry={true}
                   />
                 )}
                 name="newPassword"
@@ -366,12 +368,13 @@ const EditAccountModal = ({ open, setOpen }) => {
                       backgroundColor: theme.colors.grey4,
                     }}
                     placeholder="your new password"
-                    keyboardType="email-address"
+                    // keyboardType="email-address"
                     containerStyle={{ paddingHorizontal: 0, marginBottom: 5 }}
                     inputStyle={{ fontFamily: `${defaultFont}_400Regular` }}
                     autoCapitalize="none"
                     errorMessage={errors.cPassword?.message}
                     errorStyle={{ fontFamily: `${defaultFont}_400Regular` }}
+                    secureTextEntry={true}
                   />
                 )}
                 name="cPassword"

@@ -120,7 +120,7 @@ const ResetPasswordScreen = ({ route }) => {
             backgroundColor: theme.colors.grey4,
           }}
           leftIcon={<Icon name="lock" type="feather" />}
-          placeholder="Password"
+          placeholder="New Password"
           containerStyle={{ paddingHorizontal: 0, marginBottom: 5 }}
           inputStyle={{ fontFamily: `${defaultFont}_400Regular` }}
           autoCapitalize="none"
@@ -164,7 +164,7 @@ const ResetPasswordScreen = ({ route }) => {
         <Button
           color={"success"}
           buttonStyle={{ padding: 10 }}
-          title={"Forgot Password"}
+          title={"Change Password"}
           onPress={resetPassword}
           loading={loading}
         />

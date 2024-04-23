@@ -59,7 +59,7 @@ const VerifyOTP = () => {
         );
         if (response.data.user) {
           setUser(response.data.user);
-          navigation.navigate("AddProfilePhoto");
+          navigation.navigate("AddProfilePhoto", { header: false });
           setLoading(false);
           setError(null);
         }

@@ -1,4 +1,5 @@
 import { commentModel } from "../models/comments.js";
+import { listingsModel } from "../models/listings.js";
 
 // add comments
 export const addComment = async (req, res) => {
@@ -10,6 +11,14 @@ export const addComment = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "All fields are required to add comment!",
+      });
+    }
+
+    const listing = await listingsModel.findById(listingId);
+    if (!listing) {
+      return res.status(400).json({
+        success: false,
+        message: "Listing doesn't exist!",
       });
     }
 

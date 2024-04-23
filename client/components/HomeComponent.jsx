@@ -174,7 +174,7 @@ const HomeComponent = () => {
             style={{
               width: "100%",
             }}
-            contentContainerStyle={{ paddingBottom: 5 }}
+            contentContainerStyle={{ paddingBottom: 100 }}
             showsVerticalScrollIndicator={false}
             overScrollMode="never"
             data={searchedListing?.documents}
