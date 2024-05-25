@@ -129,26 +129,6 @@ const AddItemScreen = () => {
       }}
     >
       <ScreenHeaderComponent title="List Your Item" />
-      {/* <Avatar
-        source={selectedImg ? { uri: selectedImg.uri } : selectImgDum}
-        containerStyle={{
-          alignSelf: "center",
-          height: 150,
-          width: 250,
-          marginBottom: 15,
-          // borderRadius: 10,
-        }}
-        imageProps={{ borderBottomRightRadius: 15, borderRadius: 5 }}
-      >
-        <Avatar.Accessory
-          iconProps={{
-            name: "camera",
-            // color: theme.colors.success,
-          }}
-          size={30}
-          onPress={pickImage}
-        />
-      </Avatar> */}
 
       <TouchableOpacity
         style={{

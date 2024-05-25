@@ -574,19 +574,24 @@ export const suspendUnsuspendUser = async (req, res) => {
         "Madhyayuga Account Suspended",
         `Your account has been suspended for the following reason: ${message}`
       );
+
+      res.status(200).json({
+        success: true,
+        message: "User suspended successfully",
+        document: user,
+      });
     } else {
       sendMail(
         user.email,
         "Madhyayuga Account Unsuspended",
         `Your account has been unsuspended.`
       );
+      res.status(200).json({
+        success: true,
+        message: "User unsuspended successfully",
+        document: user,
+      });
     }
-
-    res.status(200).json({
-      success: true,
-      message: "User suspended/unsuspended successfully",
-      document: user,
-    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

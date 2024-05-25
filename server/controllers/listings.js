@@ -319,6 +319,20 @@ export const rejectUnrejectListing = async (req, res) => {
       });
     }
 
+    if (!message && !listing.rejected) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a reason for rejecting this listing!",
+      });
+    }
+
+    if (!listing) {
+      return res.status(400).json({
+        success: false,
+        message: "Listing doesn't exist!",
+      });
+    }
+
     if (listing.rejected) {
       await listingsModel.findByIdAndUpdate(listingId, { rejected: false });
 

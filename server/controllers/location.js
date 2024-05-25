@@ -21,7 +21,13 @@ export const addLocation = async (req, res) => {
     req.body.longitude = parseFloat(req.body.longitude);
     req.body.city = capitalizeFirstLetter(req.body.city);
     const location = await locationModel.create(req.body);
-    res.status(201).json(location);
+    res
+      .status(201)
+      .json({
+        success: true,
+        document: location,
+        message: "Location added successfully!",
+      });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

@@ -1,4 +1,6 @@
 import { categoryModel } from "../models/category.js";
+import { listingsModel } from "../models/listings.js";
+import mongoose from "mongoose";
 
 export const addCategory = async (req, res) => {
   try {
@@ -87,6 +89,18 @@ export const deleteCategory = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Category doesn't exist!",
+      });
+    }
+
+    let count = await listingsModel.countDocuments({
+      categoryId: new mongoose.Types.ObjectId(categoryId),
+    });
+
+    if (count > 0) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Cannot delete listing because it has one or more listing please delete it first!",
       });
     }
 

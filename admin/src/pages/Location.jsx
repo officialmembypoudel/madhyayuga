@@ -336,7 +336,7 @@ const Location = () => {
                     type="number"
                   />
                   <TextField
-                    label="Color"
+                    label="Latitude"
                     fullWidth
                     InputProps={{ endAdornment: <GpsFixed /> }}
                     placeholder="Latitude of the city"
