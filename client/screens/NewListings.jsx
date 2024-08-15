@@ -23,7 +23,7 @@ import ItemComponent from "../components/ItemComponent";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllListings, getAllListings } from "../store/listings";
 
-const NewListings = () => {
+const NewListings = ({ route }) => {
   const dispatch = useDispatch();
   const style = useTheme();
   const navigation = useNavigation();
@@ -31,6 +31,7 @@ const NewListings = () => {
   const { mode, setMode } = useThemeMode();
   const allListings = useSelector(getAllListings);
   const [newListings, setNewListings] = useState([]);
+  const { listings, newList } = route?.params;
 
   useEffect(() => {
     dispatch(fetchAllListings({ limit: 100 }));
@@ -47,14 +48,16 @@ const NewListings = () => {
         backgroundColor: style.theme.colors.background,
       }}
     >
-      <ScreenHeaderComponent title="New Listings" />
+      <ScreenHeaderComponent
+        title={newList ? "New Listings" : "Hot Listings"}
+      />
       <FlatList
         style={{ width: "100%" }}
         contentContainerStyle={{ paddingBottom: 70 }}
         showsHorizontalScrollIndicator={false}
         overScrollMode="never"
         // horizontal={true}
-        data={allListings}
+        data={listings}
         // keyExtractor={(item) => item.$id}
         renderItem={({ item }) => (
           <ItemComponent type="column" item={{ ...item, from: "newListing" }} />

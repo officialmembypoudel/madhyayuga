@@ -1,11 +1,13 @@
 "use client";
 import client from "@/config";
 import { getCookie } from "cookies-next";
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { useAuth } from "./AuthContext";
 
 const StoreContext = createContext();
 
 const StoreProvider = ({ children }) => {
+  const { user } = useAuth();
   const [listings, setListings] = useState({ documents: [] });
   const [categories, setCategories] = useState({ documents: [] });
   const [reports, setReports] = useState({ documents: [] });

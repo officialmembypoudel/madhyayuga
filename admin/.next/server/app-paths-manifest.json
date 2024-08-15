@@ -1,3 +1,8 @@
 {
-  "/auth/page": "app/auth/page.js"
+  "/users/page": "app/users/page.js",
+  "/locations/page": "app/locations/page.js",
+  "/listings/page": "app/listings/page.js",
+  "/reports/page": "app/reports/page.js",
+  "/page": "app/page.js",
+  "/notification/page": "app/notification/page.js"
 }

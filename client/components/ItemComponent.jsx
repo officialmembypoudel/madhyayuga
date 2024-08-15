@@ -34,7 +34,7 @@ export default function ItemComponent({ type, item, zindex, onPress }) {
     <TouchableOpacity
       onPress={onPress ? onPress : pressed}
       style={{
-        elevation: 1,
+        elevation: 0,
         backgroundColor: "rgba(0,0,0,0)",
         borderRadius: 12,
         // width: "100%",
@@ -42,7 +42,7 @@ export default function ItemComponent({ type, item, zindex, onPress }) {
         marginRight: type === "row" ? 10 : 0,
         marginBottom: type === "column" ? 5 : 5,
         padding: 1,
-        height: type === "column" ? "auto" : "auto",
+        // height: type === "column" ? "auto" : "auto",
         zIndex: zindex,
       }}
       activeOpacity={0.7}
@@ -186,7 +186,7 @@ export default function ItemComponent({ type, item, zindex, onPress }) {
               fontWeight: "500",
             }}
           >
-            For: {item?.with}
+            For: {textTrimmer(item?.with, 13)}
           </Text>
         </View>
       </Card>

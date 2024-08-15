@@ -76,6 +76,8 @@ import { store } from "./store";
 import ChatProvider from "./context/chatContext";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import NotificationProvider from "./context/Notification";
+import { LogBox } from "react-native";
+// LogBox.ignoreLogs([]);
 
 const theme = createTheme({
   lightColors: {

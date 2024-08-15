@@ -19,7 +19,7 @@ import { exchangeItems, newExchangeItems } from "../dummyData/exchangeItems";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AuthContext } from "../context/authContext";
 import { useDispatch, useSelector } from "react-redux";
-import {
+import listings, {
   fetchAllListings,
   fetchLocations,
   fetchSearchListings,
@@ -32,6 +32,7 @@ import { getFirstName } from "../helpers/functions";
 import { ScrollView } from "react-native-virtualized-view";
 import { LocationPicker } from "./Pickers";
 import HomeLocationPicker from "./HomeLocationPicker";
+import { client } from "../configs/axios";
 
 const SectionTitle = ({ title, onPress }) => {
   const style = useTheme();
@@ -73,6 +74,7 @@ const HomeComponent = () => {
   const allListings = useSelector(getAllListings);
   const [visible, setVisible] = useState(false);
   const [location, setLocation] = useState("Nepal");
+  const [hotListings, setHotListings] = useState([]);
 
   const searchedListing = useSelector(getSearchedListing);
 
@@ -91,9 +93,27 @@ const HomeComponent = () => {
 
   const navigateToNewListings = () => navigate("NewListing");
 
+  // console.log(hotListings);
+
   useEffect(() => {
     dispatch(fetchAllListings());
     dispatch(fetchLocations());
+
+    const getHotListings = async () => {
+      try {
+        const response = await client.get("/listings", {
+          params: {
+            hot: true,
+          },
+        });
+        // console.log("hello", response.data);
+        setHotListings(response.data.documents);
+      } catch (error) {
+        console.log("error", error?.response?.data.message ?? error.message);
+      }
+    };
+
+    getHotListings();
   }, [dispatch]);
   // console.log(allListings);
 
@@ -207,7 +227,7 @@ const HomeComponent = () => {
             showsHorizontalScrollIndicator={false}
             overScrollMode="never"
             horizontal={false}
-            data={allListings}
+            data={hotListings}
             keyExtractor={(item) => item._id}
             renderItem={({ item }) => (
               <ItemComponent type="column" item={{ ...item, from: "home" }} />
@@ -215,14 +235,24 @@ const HomeComponent = () => {
             StickyHeaderComponent={() => (
               <SectionTitle
                 title={"Hot In the Town"}
-                onPress={() => navigate("NewListing")}
+                onPress={() =>
+                  navigate("NewListing", {
+                    listings: hotListings,
+                    newList: false,
+                  })
+                }
               />
             )}
             ListHeaderComponent={() => (
               <View>
                 <SectionTitle
                   title={"New In the Town"}
-                  onPress={() => navigate("NewListing")}
+                  onPress={() =>
+                    navigate("NewListing", {
+                      listings: allListings,
+                      newList: true,
+                    })
+                  }
                 />
                 <FlatList
                   style={{
@@ -244,7 +274,12 @@ const HomeComponent = () => {
                 {/* from here */}
                 <SectionTitle
                   title={"Hot In the Town"}
-                  onPress={() => navigate("NewListing")}
+                  onPress={() =>
+                    navigate("NewListing", {
+                      listings: allListings,
+                      newList: true,
+                    })
+                  }
                 />
                 {/* chat gpt make this block of code skicky when scrolling */}
               </View>

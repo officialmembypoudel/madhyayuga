@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "aacc470c-cede-4c38-ae9f-decd23b60778"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.officialmemby.madhyayuga"
+    }
+  }
+}

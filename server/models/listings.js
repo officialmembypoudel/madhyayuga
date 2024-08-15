@@ -4,6 +4,7 @@ const listingsSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+    text: true,
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -13,6 +14,7 @@ const listingsSchema = new mongoose.Schema({
   description: {
     type: String,
     required: true,
+    text: true,
   },
   images: [
     {
@@ -26,10 +28,12 @@ const listingsSchema = new mongoose.Schema({
   condition: {
     type: String,
     required: true,
+    text: true,
   },
   with: {
     type: String,
     required: true,
+    text: true,
   },
   premium: {
     type: Boolean,
@@ -81,17 +85,21 @@ listingsSchema.pre("save", async function (next) {
   next();
 });
 
-// listingsSchema.index({
-//   name: "text",
-//   description: "text",
-//   location: "text",
-//   with: "text",
-//   "categoryId.name": "text",
-// });
+// listingsSchema.index(
+//   {
+//     name: "text",
+//     description: "text",
+//     location: "text",
+//     with: "text",
+//     // "categoryId.name": "text",
+//     "$**": "text",
+//   },
+//   { name: "text_index", default_language: "none" }
+// );
 // listingsSchema.index({ "categoryId.name": 1 });
 listingsSchema.index(
   { "$**": "text" },
-  { name: "text_index", default_language: "none", }
+  { name: "text_index", default_language: "none" }
 );
 
 listingsSchema.pre("deleteOne", async function (next) {
@@ -107,4 +115,9 @@ listingsSchema.pre("deleteOne", async function (next) {
   }
 });
 
-export const listingsModel = mongoose.model("listings", listingsSchema);
+const listingsModel = mongoose.model("listings", listingsSchema);
+
+// await listingsModel.ensureIndexes();
+
+export { listingsModel };
+// .ensureIndexes();

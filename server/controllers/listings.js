@@ -70,7 +70,7 @@ export const addListing = async (req, res) => {
 
 export const getListings = async (req, res) => {
   try {
-    const { userId } = req.query;
+    const { userId, hot } = req.query;
     console.log(userId);
 
     if (userId) {
@@ -92,6 +92,11 @@ export const getListings = async (req, res) => {
       listings = await listingsModel
         .find({})
         .sort({ createdAt: -1 })
+        .populate("userId", "name email avatar phone rating totalRating");
+    } else if (hot) {
+      listings = await listingsModel
+        .find({ rejected: false })
+        .sort({ views: -1, createdAt: -1 })
         .populate("userId", "name email avatar phone rating totalRating");
     } else {
       listings = await listingsModel
@@ -244,12 +249,14 @@ export const searchListings = async (req, res) => {
       listings = await listingsModel
         .find({
           $text: { $search: query, $caseSensitive: false },
+          rejected: false,
         })
         .populate("userId", "name email avatar phone rating totalRating");
     } else if (!query && city) {
       listings = await listingsModel
         .find({
           location: city,
+          rejected: false,
         })
         .populate("userId", "name email avatar phone rating totalRating");
     } else {
@@ -257,6 +264,7 @@ export const searchListings = async (req, res) => {
         .find({
           $text: { $search: query, $caseSensitive: false },
           location: city,
+          rejected: false,
         })
         .populate("userId", "name email avatar phone rating totalRating");
     }
@@ -283,7 +291,10 @@ export const getListingsByCategory = async (req, res) => {
     }
 
     const listings = await listingsModel
-      .find({ categoryId: new mongoose.Types.ObjectId(categoryId) })
+      .find({
+        categoryId: new mongoose.Types.ObjectId(categoryId),
+        rejected: false,
+      })
       .populate("userId", "name email avatar phone rating totalRating");
     if (listings.length === 0 || !listings) {
       return res.status(200).json({

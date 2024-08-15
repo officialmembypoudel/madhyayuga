@@ -46,10 +46,9 @@ const CategoryScreen = () => {
         style={{
           flexDirection: "row",
           flexWrap: "wrap",
-          justifyContent: "flex-start",
+          justifyContent: "space-between",
           marginHorizontal: "1%",
           alignItems: "center",
-          // gap: "9%",
         }}
       >
         {categories.map((category, index) => (
@@ -57,10 +56,9 @@ const CategoryScreen = () => {
             key={category._id}
             style={{
               backgroundColor: "rgba(0,0,0,0)",
-              marginBottom: 10,
+              marginBottom: 40,
               borderRadius: 10,
               elevation: 3,
-              marginRight: index % 3 === 2 ? 0 : "7.33%",
             }}
             activeOpacity={0.7}
             onPress={() => {

@@ -30,6 +30,10 @@ app.use("/api/v1", chatModule);
 app.use("/api/v1", location);
 app.use("/api/v1", payment);
 
+app.get("/", (req, res) => {
+  res.send("Hello World! Madhyayuga Here");
+});
+
 cron.schedule("0 0 * * *", async () => {
   try {
     // Update credit and premium for expired listings

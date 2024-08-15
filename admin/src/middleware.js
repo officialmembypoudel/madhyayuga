@@ -15,7 +15,7 @@ export async function middleware(req) {
         },
       });
       const data = await response.json();
-      return data.success; // Return whether the user is authenticated or not
+      return data?.user?.isAdmin ?? false; // Return whether the user is authenticated or not
     } catch (error) {
       console.log(error.message);
       return false; // Return false if there's an error

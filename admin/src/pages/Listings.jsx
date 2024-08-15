@@ -265,11 +265,45 @@ const columns = [
 const Listings = () => {
   const { listings, fetchListings, fetchCategories, categories } = useStore();
   const [open, setOpen] = useState(false);
+  const [allListings, setAllListings] = useState([]);
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("");
 
   useEffect(() => {
     fetchListings();
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    setAllListings(listings?.documents);
+  }, [listings]);
+
+  useEffect(() => {
+    if (query && category) {
+      const filteredListings = listings?.documents?.filter(
+        (listing) =>
+          listing?.name.toLowerCase().includes(query.toLowerCase()) &&
+          listing?.categoryId === category
+      );
+      setAllListings(filteredListings);
+    } else if (query) {
+      const filteredListings = listings?.documents?.filter(
+        (listing) =>
+          listing?.name.toLowerCase().includes(query.toLowerCase()) ||
+          listing?.location.toLowerCase().includes(query.toLowerCase()) ||
+          listing?.condition.toLowerCase().includes(query.toLowerCase()) ||
+          listing?.with.toLowerCase().includes(query.toLowerCase())
+      );
+      setAllListings(filteredListings);
+    } else if (category) {
+      const filteredListings = listings?.documents?.filter(
+        (listing) => listing?.categoryId === category
+      );
+      setAllListings(filteredListings);
+    } else {
+      setAllListings(listings?.documents);
+    }
+  }, [query, category, listings]);
 
   return (
     <Box sx={{ padding: 2 }}>
@@ -291,17 +325,20 @@ const Listings = () => {
               label="Search"
               placeholder="search for listing"
               fullWidth
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
             />
           </Grid>
           <Grid item sm={12} md={4}>
             <FormControl fullWidth>
               <InputLabel id="category">Category</InputLabel>
               <Select
-                value={""}
+                value={category}
                 select
                 labelId="category"
                 label="Category"
                 fullWidth
+                onChange={(e) => setCategory(e.target.value)}
               >
                 <MenuItem value={""}>Select Category</MenuItem>
                 {categories?.documents?.map((category) => (
@@ -328,7 +365,7 @@ const Listings = () => {
 
       <Card sx={{ height: 400, width: "100%", mt: 5 }}>
         <DataGrid
-          rows={listings?.documents || []}
+          rows={allListings || []}
           columns={columns}
           getRowId={(row) => row?._id}
           initialState={{

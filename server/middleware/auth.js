@@ -14,14 +14,15 @@ export const isAuthenticated = async (req, res, next) => {
         .status(401)
         .json({ success: false, message: "You are not Logged in!" });
     }
+
+    // console.log("middleware", token);
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = await userModel.findById(decoded._id);
 
-    console.log("middleware", req.user);
     next();
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
-    console.log("middleware", error.message);
+    console.log("middleware error", error.message);
   }
 };
 

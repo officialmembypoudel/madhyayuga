@@ -157,7 +157,7 @@ const AddItemScreen = () => {
           ))
         ) : (
           <Avatar
-            source={selectedImg ? { uri: selectedImg.uri } : selectImgDum}
+            // source={selectedImg ? { uri: selectedImg.uri } : selectImgDum}
             containerStyle={{
               alignSelf: "center",
               height: 100,
@@ -166,7 +166,13 @@ const AddItemScreen = () => {
               // borderRadius: 10,
               marginRight: "auto",
             }}
-            imageProps={{ borderBottomRightRadius: 15, borderRadius: 5 }}
+            // imageProps={{ borderBottomRightRadius: 15, borderRadius: 5 }}
+            icon={{
+              name: "images",
+              type: "ionicon",
+              size: 100,
+              color: theme.colors.grey0,
+            }}
           />
         )}
       </TouchableOpacity>

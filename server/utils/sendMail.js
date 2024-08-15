@@ -3,6 +3,7 @@ import { createTransport } from "nodemailer";
 
 export const sendMail = async (email, subject, message) => {
   try {
+    console.log("sending mail");
     const transport = createTransport({
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
@@ -18,7 +19,9 @@ export const sendMail = async (email, subject, message) => {
       subject,
       text: message,
     });
+
+    console.log("Message sent: %s", mail);
   } catch (error) {
-    console.log(error);
+    console.log("error sending mail");
   }
 };
